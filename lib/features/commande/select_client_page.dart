@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:pfe/features/commande/controllers/client_controller.dart';
+import 'package:pfe/features/commande/controllers/commande_controller.dart';
+import '../../../data/models/client_model.dart';
 
 class SelectClientPage extends StatefulWidget {
   const SelectClientPage({super.key});
@@ -8,43 +12,46 @@ class SelectClientPage extends StatefulWidget {
 }
 
 class _SelectClientPageState extends State<SelectClientPage> {
-  final List<Map<String, String>> clients = [
-    {'id': '1', 'name': 'Fatma Ben Ali', 'email': 'fatma@example.com'},
-    {'id': '2', 'name': 'Ali Messaoudi', 'email': 'ali@example.com'},
-    {'id': '3', 'name': 'Mohamed Salah', 'email': 'ms@example.com'},
-    {'id': '4', 'name': 'Amine Jaballah', 'email': 'amine@example.com'},
-  ];
-
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
-  final phoneController = TextEditingController();
-  final addressController = TextEditingController();
+  final ClientController clientController = Get.put(ClientController());
+  final CommandeController commandeController = Get.put(CommandeController());
   final searchController = TextEditingController();
   String searchQuery = '';
 
-  void _showAddClientDialog(BuildContext context) {
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final addressController = TextEditingController();
+  final phoneController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    clientController.fetchClients();
+  }
+
+  void _showAddClientDialog(Map<int, int> cart) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text("Ajouter un client"),
         content: SingleChildScrollView(
           child: Column(
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(labelText: "Nom et Prénom"),
+                decoration: const InputDecoration(labelText: "Nom complet"),
               ),
               TextField(
                 controller: emailController,
                 decoration: const InputDecoration(labelText: "Email"),
               ),
               TextField(
-                controller: phoneController,
-                decoration: const InputDecoration(labelText: "Téléphone"),
-              ),
-              TextField(
                 controller: addressController,
                 decoration: const InputDecoration(labelText: "Adresse"),
+              ),
+              TextField(
+                controller: phoneController,
+                decoration: const InputDecoration(labelText: "Téléphone"),
               ),
             ],
           ),
@@ -55,25 +62,41 @@ class _SelectClientPageState extends State<SelectClientPage> {
             child: const Text("Annuler"),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (nameController.text.isNotEmpty && emailController.text.isNotEmpty) {
-                setState(() {
-                  clients.add({
-                    'id': DateTime.now().millisecondsSinceEpoch.toString(),
-                    'name': nameController.text,
-                    'email': emailController.text,
-                  });
-                });
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Client ajouté avec succès")),
+                final newClient = await clientController.addClient(
+                  nom: nameController.text,
+                  email: emailController.text,
+                  adresse: addressController.text,
+                  telephone: phoneController.text,
                 );
+
                 nameController.clear();
                 emailController.clear();
-                phoneController.clear();
                 addressController.clear();
+                phoneController.clear();
+
+                if (newClient != null) {
+                  await commandeController.createCommande(newClient.id, cart);
+
+                  Navigator.pop(context);
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text("Commande créée ✅"),
+                      content: const Text("La commande a été ajoutée avec succès en attente."),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.popUntil(context, ModalRoute.withName('/commandes')),
+                          child: const Text("Voir mes commandes"),
+                        ),
+                      ],
+                    ),
+                  );
+                }
               }
             },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
             child: const Text("Ajouter"),
           ),
         ],
@@ -85,12 +108,6 @@ class _SelectClientPageState extends State<SelectClientPage> {
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)?.settings.arguments as Map? ?? {};
     final cart = arguments['cart'] as Map<int, int>? ?? {};
-    final products = arguments['products'] as List<Map<String, dynamic>>? ?? [];
-    final selectedProducts = products.where((p) => cart[p['id']] != null && cart[p['id']]! > 0).toList();
-
-    final filteredClients = clients
-        .where((c) => c['name']!.toLowerCase().contains(searchQuery.toLowerCase()))
-        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -99,33 +116,15 @@ class _SelectClientPageState extends State<SelectClientPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_add),
-            onPressed: () => _showAddClientDialog(context),
+            tooltip: 'Ajouter un client',
+            onPressed: () => _showAddClientDialog(cart),
           ),
         ],
       ),
       body: Column(
         children: [
-          if (selectedProducts.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("🛒 Produits sélectionnés :", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  ...selectedProducts.map((product) {
-                    final qte = cart[product['id']]!;
-                    return Text(
-                      "${product['name']} - ${qte} x ${product['price']} € = ${(qte * product['price']).toStringAsFixed(2)} €",
-                      style: const TextStyle(fontSize: 14),
-                    );
-                  }).toList(),
-                  const Divider(),
-                ],
-              ),
-            ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            padding: const EdgeInsets.all(16),
             child: TextField(
               controller: searchController,
               onChanged: (val) => setState(() => searchQuery = val),
@@ -136,39 +135,51 @@ class _SelectClientPageState extends State<SelectClientPage> {
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text("👤 Choisir un client :", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ),
-          ),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: filteredClients.length,
-              itemBuilder: (context, index) {
-                final client = filteredClients[index];
-                return Card(
-                  child: ListTile(
-                    title: Text(client['name']!),
-                    subtitle: Text(client['email']!),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/commande-details',
-                        arguments: {
-                          'client': client,
-                          'cart': cart,
-                          'products': products,
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
+            child: Obx(() {
+              if (clientController.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final filteredClients = clientController.clients
+                  .where((c) => c.nom.toLowerCase().contains(searchQuery.toLowerCase()))
+                  .toList();
+
+              if (filteredClients.isEmpty) {
+                return const Center(child: Text("Aucun client trouvé"));
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: filteredClients.length,
+                itemBuilder: (context, index) {
+                  final client = filteredClients[index];
+                  return Card(
+                    child: ListTile(
+                      title: Text(client.nom),
+                      subtitle: Text(client.email),
+                      trailing: const Icon(Icons.arrow_forward_ios),
+                      onTap: () async {
+                        await commandeController.createCommande(client.id, cart);
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text("Commande créée ✅"),
+                            content: const Text("La commande a été ajoutée avec succès en attente."),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.popUntil(context, ModalRoute.withName('/commandes')),
+                                child: const Text("Voir mes commandes"),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),

@@ -1,134 +1,110 @@
 import 'package:flutter/material.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
+import '../../../data/models/commande_model.dart';
 
 class CommandeDetailsPage extends StatelessWidget {
-  final Map<String, dynamic> commande;
-
+  final CommandeModel commande;
   const CommandeDetailsPage({super.key, required this.commande});
-
-  void _downloadPdf(BuildContext context) async {
-    final pdf = pw.Document();
-
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('Bon de Commande', style: pw.TextStyle(fontSize: 26, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 12),
-              pw.Text('Commande : ${commande['numeroCommande']}'),
-              pw.Text('Client : ${commande['client']}'),
-              pw.Text('Date : ${commande['date']}'),
-              pw.SizedBox(height: 12),
-              pw.Text('Produits :', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              ...((commande['lignes'] as List).map((p) => pw.Padding(
-                    padding: const pw.EdgeInsets.symmetric(vertical: 4),
-                    child: pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text(p['nom']),
-                        pw.Text("${p['quantite']} x ${p['prix']} DT"),
-                      ],
-                    ),
-                  ))),
-              pw.Divider(),
-              pw.Text("Total TTC : ${commande['totalTTC']} DT", style: pw.TextStyle(color: PdfColors.indigo, fontSize: 18)),
-            ],
-          );
-        },
-      ),
-    );
-
-    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save());
-  }
 
   @override
   Widget build(BuildContext context) {
-    final produits = commande['lignes'] ?? [];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark ? const Color(0xFF121212) : const Color(0xFFF1F5F9);
+    final tileColor = isDark ? Colors.indigo.shade900.withOpacity(0.2) : Colors.white;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.indigo.shade400,
+        backgroundColor: Colors.indigo.shade500,
         elevation: 0,
-        title: Row(
-          children: [
-            const Icon(Icons.receipt_long, color: Colors.white),
-            const SizedBox(width: 8),
-            Text('Commande #${commande['numeroCommande']}', style: const TextStyle(color: Colors.white)),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
-            onPressed: () => _downloadPdf(context),
-            tooltip: 'Télécharger en PDF',
-          ),
-        ],
+        title: Text('Commande #${commande.numeroCommande}', style: const TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoRow("👤 Client", commande['client']),
-            _buildInfoRow("📅 Date", commande['date']),
-            const SizedBox(height: 20),
-            const Text("🛍️ Produits Commandés", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.indigo)),
-            const SizedBox(height: 12),
-            Expanded(
-              child: ListView.builder(
-                itemCount: produits.length,
-                itemBuilder: (context, index) {
-                  final produit = produits[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.blueGrey.shade900 : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.shopping_bag_outlined, color: Colors.indigo),
-                            const SizedBox(width: 10),
-                            Text(produit['nom'], style: const TextStyle(fontWeight: FontWeight.w600)),
-                          ],
-                        ),
-                        Text("${produit['quantite']} x ${produit['prix']} DT",
-                            style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w500)),
-                      ],
-                    ),
-                  );
-                },
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _infoRow("🧍 Client", commande.clientNom),
+                    _infoRow("📍 Adresse", commande.clientAdresse ?? 'Non spécifiée'),
+                    _infoRow("📅 Date", commande.dateCreation),
+                    _infoRow("📦 Statut", commande.statut),
+                    _infoRow("💰 Total TTC", "${commande.prixTotalTTC.toStringAsFixed(2)} DT"),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text("💰 Total TTC : ${commande['totalTTC']} DT",
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.indigo)),
-            ),
-          ],
+              const SizedBox(height: 24),
+              const Text(
+                "🛒 Produits commandés :",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              if (commande.lignes.isEmpty)
+                const Text("Aucun produit trouvé.")
+              else
+                ListView.builder(
+                  itemCount: commande.lignes.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    final ligne = commande.lignes[index];
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeInOut,
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: tileColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.indigo.shade100),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(ligne.produit, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                              const SizedBox(height: 4),
+                              Text("Quantité : ${ligne.quantite}", style: const TextStyle(fontSize: 14)),
+                            ],
+                          ),
+                          Text("${ligne.prix.toStringAsFixed(2)} DT", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500))
+                        ],
+                      ),
+                    );
+                  },
+                )
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _infoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Text("$label : ", style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-          Expanded(child: Text(value, style: const TextStyle(color: Colors.black87, fontSize: 16))),
+          Text("$label : ", style: const TextStyle(fontWeight: FontWeight.w600)),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 15))),
         ],
       ),
     );

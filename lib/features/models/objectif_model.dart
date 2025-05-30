@@ -1,21 +1,25 @@
-class ObjectifModel {
-  final double? montantCible;
-  final double? montantActuel; // <-- ajoute ça si ce n’est pas encore défini
+class ObjectifCommercial {
+  final int id;
+  final String titre;
+  final double valeurCible;
+  final String dateDebut;
+  final String dateFin;
 
-  ObjectifModel({this.montantCible, this.montantActuel});
+  ObjectifCommercial({
+    required this.id,
+    required this.titre,
+    required this.valeurCible,
+    required this.dateDebut,
+    required this.dateFin,
+  });
 
-  double get tauxProgression {
-    if (montantCible == null || montantCible == 0 || montantActuel == null) {
-      return 0.0;
-    }
-    return (montantActuel! / montantCible!).clamp(0.0, 1.0);
-  }
-
-  // Ajoute aussi le fromJson/fromMap si ce n’est pas encore fait
-  factory ObjectifModel.fromJson(Map<String, dynamic> json) {
-    return ObjectifModel(
-      montantCible: json['montantCible']?.toDouble(),
-      montantActuel: json['montantActuel']?.toDouble(),
+  factory ObjectifCommercial.fromJson(Map<String, dynamic> json) {
+    return ObjectifCommercial(
+      id: json['id'],
+      titre: json['titre'],
+      valeurCible: (json['valeurCible'] as num).toDouble(),
+      dateDebut: json['dateDebut'],
+      dateFin: json['dateFin'],
     );
   }
 }

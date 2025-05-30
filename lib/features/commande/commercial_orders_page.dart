@@ -1,4 +1,9 @@
+// 📁 lib/features/commande/commercial_orders_page.dart
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:animations/animations.dart';
+import 'package:pfe/features/commande/controllers/commande_controller.dart';
+import '../../../data/models/commande_model.dart';
 import 'commande_details_page.dart';
 
 class CommercialOrdersPage extends StatefulWidget {
@@ -8,230 +13,177 @@ class CommercialOrdersPage extends StatefulWidget {
   State<CommercialOrdersPage> createState() => _CommercialOrdersPageState();
 }
 
-class _CommercialOrdersPageState extends State<CommercialOrdersPage> {
-  final List<Map<String, dynamic>> commandes = [
-    {
-      'numeroCommande': 'CMD1001',
-      'client': 'Fatma Ben Ali',
-      'date': '2024-05-10',
-      'totalTTC': 200.0,
-      'statut': 'validée',
-      'lignes': [
-        {'nom': 'Produit A', 'quantite': 2, 'prix': 50},
-        {'nom': 'Produit B', 'quantite': 1, 'prix': 100},
-      ]
-    },
-    {
-      'numeroCommande': 'CMD1002',
-      'client': 'Ali Messaoudi',
-      'date': '2024-05-11',
-      'totalTTC': 90.0,
-      'statut': 'en_attente',
-      'lignes': [
-        {'nom': 'Produit C', 'quantite': 3, 'prix': 30},
-      ]
-    },
-  ];
+class _CommercialOrdersPageState extends State<CommercialOrdersPage>
+    with SingleTickerProviderStateMixin {
+  final CommandeController controller = Get.put(CommandeController());
+  bool showOnlyValidated = false;
+  String searchQuery = '';
+  String sortMode = 'date';
 
-  bool showValidOnly = false;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _fadeAnimation = CurvedAnimation(parent: _animationController, curve: Curves.easeIn);
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final filtered = showValidOnly
-        ? commandes.where((c) => c['statut'] == 'validée').toList()
-        : commandes;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundGradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: isDark
+          ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
+          : [const Color(0xFFF0F4FF), const Color(0xFFE0E7FF)],
+    );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
-      appBar: AppBar(
-        backgroundColor: Colors.indigo.shade400,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Mes Commandes',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      body: Container(
+        decoration: BoxDecoration(gradient: backgroundGradient),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: const TextField(
-                decoration: InputDecoration(
-                  hintText: '🔍 Rechercher...',
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: () => Navigator.pushNamed(context, '/select-products'),
-                      icon: const Icon(Icons.add),
-                      label: const Text('Nouvelle commande'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFF1E5),
-                        foregroundColor: Colors.black87,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0,
-                      ),
-                    ),
+            AppBar(
+              backgroundColor: Colors.indigo.shade400,
+              title: const Text('Mes Commandes', style: TextStyle(color: Colors.white)),
+              actions: [
+                IconButton(
+                  icon: Icon(
+                    showOnlyValidated ? Icons.filter_alt_off : Icons.filter_alt,
+                    color: Colors.white,
                   ),
+                  tooltip: showOnlyValidated ? 'Afficher tout' : 'Filtrer : Validées',
+                  onPressed: () => setState(() => showOnlyValidated = !showOnlyValidated),
                 ),
-                const SizedBox(width: 12),
-                SizedBox(
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () => setState(() => showValidOnly = !showValidOnly),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFDCEEFF),
-                      foregroundColor: Colors.blue.shade700,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(showValidOnly ? 'Toutes' : 'Validées'),
-                  ),
+                PopupMenuButton<String>(
+                  onSelected: (value) => setState(() => sortMode = value),
+                  icon: const Icon(Icons.sort, color: Colors.white),
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(value: 'date', child: Text('Trier par date')),
+                    const PopupMenuItem(value: 'montant', child: Text('Trier par montant')),
+                  ],
                 ),
+                IconButton(
+                  icon: const Icon(Icons.add_circle_outline, size: 28),
+                  tooltip: 'Nouvelle commande',
+                  onPressed: () => Get.toNamed('/select-products'),
+                )
               ],
+              iconTheme: const IconThemeData(color: Colors.white),
             ),
-            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Rechercher une commande ou un client...',
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: isDark ? Colors.white10 : Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                ),
+                onChanged: (val) => setState(() => searchQuery = val),
+              ),
+            ),
             Expanded(
-              child: ListView.builder(
-                itemCount: filtered.length,
-                itemBuilder: (context, index) {
-                  final cmd = filtered[index];
-                  final isValid = cmd['statut'] == 'validée';
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                var filtered = (showOnlyValidated
+                        ? controller.commandes.where((c) => c.statut == 'validée')
+                        : controller.commandes)
+                    .where((c) =>
+                        c.numeroCommande.toLowerCase().contains(searchQuery.toLowerCase()) ||
+                        c.clientNom.toLowerCase().contains(searchQuery.toLowerCase()))
+                    .toList();
 
-                  return TweenAnimationBuilder(
-                    tween: Tween<double>(begin: 0.9, end: 1),
-                    duration: const Duration(milliseconds: 400),
-                    builder: (context, scale, child) {
-                      return Transform.scale(
-                        scale: scale,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              PageRouteBuilder(
-                                transitionDuration: const Duration(milliseconds: 400),
-                                pageBuilder: (context, animation, secondaryAnimation) => CommandeDetailsPage(commande: cmd),
-                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                  const begin = Offset(1.0, 0.0);
-                                  const end = Offset.zero;
-                                  final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: Curves.easeInOut));
-                                  final offsetAnimation = animation.drive(tween);
-                                  return SlideTransition(position: offsetAnimation, child: child);
-                                },
+                if (sortMode == 'date') {
+                  filtered.sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
+                } else if (sortMode == 'montant') {
+                  filtered.sort((a, b) => b.prixTotalTTC.compareTo(a.prixTotalTTC));
+                }
+
+                if (filtered.isEmpty) {
+                  return const Center(child: Text("Aucune commande trouvée"));
+                }
+
+                return FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final cmd = filtered[index];
+                      final isValid = cmd.statut == 'validée';
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.indigo.shade900.withOpacity(0.2) : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            )
+                          ],
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16),
+                          title: Text(
+                            "Commande ${cmd.numeroCommande}",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Text("Client : ${cmd.clientNom}"),
+                              Text("Date : ${cmd.dateCreation}"),
+                            ],
+                          ),
+                          trailing: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isValid ? Colors.green : Colors.orange,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  isValid ? 'Validée' : 'En attente',
+                                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                                ),
                               ),
-                            );
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 14),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFFDEE8FF), Color(0xFFE8F0FE)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.indigo.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      "Commande #${cmd['numeroCommande']}",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: Colors.indigo,
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: isValid ? Colors.green.shade100 : Colors.orange.shade100,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        isValid ? "Validée" : "En attente",
-                                        style: TextStyle(
-                                          color: isValid ? Colors.green : Colors.orange,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Row(
-                                  children: [
-                                    const Icon(Icons.person_outline, size: 18, color: Colors.grey),
-                                    const SizedBox(width: 8),
-                                    Text(cmd['client']),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                Row(
-                                  children: [
-                                    const Icon(Icons.calendar_today_outlined, size: 18, color: Colors.grey),
-                                    const SizedBox(width: 8),
-                                    Text(cmd['date']),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    const Text("💰", style: TextStyle(fontSize: 18)),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      "${cmd['totalTTC']} DT",
-                                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                              const SizedBox(height: 8),
+                              Text("${cmd.prixTotalTTC.toStringAsFixed(2)} DT",
+                                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CommandeDetailsPage(commande: cmd),
                             ),
                           ),
                         ),
                       );
                     },
-                  );
-                },
-              ),
+                  ),
+                );
+              }),
             ),
           ],
         ),

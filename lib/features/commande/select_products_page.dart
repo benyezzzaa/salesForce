@@ -1,4 +1,11 @@
+// 📁 lib/features/commande/pages/select_products_page.dart
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:pfe/core/utils/app_api.dart';
+import 'package:pfe/features/commande/controllers/produit_controller.dart';
+
+import '../../../data/models/produit_model.dart';
+
 
 class SelectProductsPage extends StatefulWidget {
   const SelectProductsPage({super.key});
@@ -8,25 +15,15 @@ class SelectProductsPage extends StatefulWidget {
 }
 
 class _SelectProductsPageState extends State<SelectProductsPage> {
-  final List<Map<String, dynamic>> categories = [
-    {'label': 'Tous', 'icon': Icons.grid_view},
-    {'label': 'Viandes', 'icon': Icons.set_meal},
-    {'label': 'Légumes', 'icon': Icons.eco},
-    {'label': 'Fruits', 'icon': Icons.local_florist},
-    {'label': 'Boissons', 'icon': Icons.local_drink},
-  ];
-
-  final List<Map<String, dynamic>> products = [
-    {'id': 1, 'name': 'Poulet', 'price': 10.0, 'category': 'Viandes', 'image': 'https://picsum.photos/200?1'},
-    {'id': 2, 'name': 'Boeuf', 'price': 12.0, 'category': 'Viandes', 'image': 'https://picsum.photos/200?2'},
-    {'id': 3, 'name': 'Tomate', 'price': 2.0, 'category': 'Légumes', 'image': 'https://picsum.photos/200?3'},
-    {'id': 4, 'name': 'Carotte', 'price': 1.5, 'category': 'Légumes', 'image': 'https://picsum.photos/200?4'},
-    {'id': 5, 'name': 'Pomme', 'price': 3.0, 'category': 'Fruits', 'image': 'https://picsum.photos/200?5'},
-    {'id': 6, 'name': "Jus d'orange", 'price': 2.5, 'category': 'Boissons', 'image': 'https://picsum.photos/200?6'},
-  ];
-
+  final ProduitController produitController = Get.put(ProduitController());
   String selectedCategory = 'Tous';
   final Map<int, int> cart = {};
+
+  @override
+  void initState() {
+    super.initState();
+    produitController.fetchProduits();
+  }
 
   void addToCart(int productId) {
     setState(() {
@@ -44,7 +41,7 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
 
   int get cartItemCount => cart.values.fold(0, (sum, qte) => sum + qte);
 
-  void showProductDetails(Map<String, dynamic> product) {
+  void showProductDetails(ProduitModel product) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -55,24 +52,20 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(product['image'], height: 150, fit: BoxFit.cover),
+              child: Image.network("${AppApi.baseUrl}${product.images.first}"),
             ),
             const SizedBox(height: 12),
-            Text(product['name'], style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(product.nom, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text("Prix : \${product['price']} €", style: const TextStyle(color: Colors.grey)),
+            Text("Prix : ${product.prix} €", style: const TextStyle(color: Colors.grey)),
             const SizedBox(height: 8),
-            const Text(
-              "Ce produit est l'un des plus populaires. Il est frais et livré rapidement.",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14),
-            ),
+            Text(product.description, textAlign: TextAlign.center, style: const TextStyle(fontSize: 14)),
           ],
         ),
         actions: [
           ElevatedButton.icon(
             onPressed: () {
-              addToCart(product['id']);
+              addToCart(product.id);
               Navigator.pop(context);
             },
             icon: const Icon(Icons.add_shopping_cart),
@@ -89,32 +82,53 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
     );
   }
 
+  void showCartDialog() {
+    final produits = produitController.produits;
+    final selectedProducts = produits.where((p) => cart[p.id] != null && cart[p.id]! > 0).toList();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("🛒 Panier"),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView(
+            shrinkWrap: true,
+            children: selectedProducts.map((p) {
+              final qte = cart[p.id] ?? 0;
+              final total = (p.prix * qte).toStringAsFixed(2);
+              return ListTile(
+                title: Text(p.nom),
+                subtitle: Text("Quantité : \$qte  |  Prix unitaire : \${p.prix} €"),
+                trailing: Text("=\$total €", style: const TextStyle(fontWeight: FontWeight.bold)),
+              );
+            }).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Fermer"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final filteredProducts = selectedCategory == 'Tous'
-        ? products
-        : products.where((p) => p['category'] == selectedCategory).toList();
-
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
+      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF4F6FA),
       appBar: AppBar(
         backgroundColor: Colors.indigo.shade400,
-        title: const Text(
-          "Sélection des produits",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+        title: const Text("Sélection des produits", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
           Stack(
             children: [
               IconButton(
                 icon: const Icon(Icons.shopping_cart),
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/select-client',
-                    arguments: {'cart': cart, 'products': products},
-                  );
-                },
+                onPressed: showCartDialog,
               ),
               if (cartItemCount > 0)
                 Positioned(
@@ -122,10 +136,7 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
                   top: 4,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
+                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
                     child: Text('$cartItemCount', style: const TextStyle(fontSize: 12, color: Colors.white)),
                   ),
                 ),
@@ -133,105 +144,121 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          SizedBox(
-            height: 90,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final cat = categories[index];
-                final isSelected = cat['label'] == selectedCategory;
-                return GestureDetector(
-                  onTap: () => setState(() => selectedCategory = cat['label']),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: 80,
-                    margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.orange : Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: Colors.indigo, width: 1.2),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(cat['icon'], color: isSelected ? Colors.white : Colors.indigo),
-                        const SizedBox(height: 4),
-                        Text(
-                          cat['label'],
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.indigo,
-                            fontSize: 11,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: filteredProducts.length,
-              itemBuilder: (context, index) {
-                final product = filteredProducts[index];
-                final qte = cart[product['id']] ?? 0;
-                return TweenAnimationBuilder(
-                  tween: Tween<double>(begin: 0.95, end: 1.0),
-                  duration: const Duration(milliseconds: 400),
-                  builder: (context, scale, child) {
-                    return Transform.scale(
-                      scale: scale,
-                      child: GestureDetector(
-                        onTap: () => showProductDetails(product),
-                        child: Card(
-                          color: Colors.white,
-                          elevation: 2,
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          child: ListTile(
-                            leading: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                product['image'],
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_not_supported),
-                              ),
-                            ),
-                            title: Text(product['name'], style: const TextStyle(color: Colors.black87)),
-                            subtitle: Text("${product['price']} €", style: const TextStyle(color: Colors.black54)),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove, color: Colors.indigo),
-                                  onPressed: () => removeFromCart(product['id']),
-                                ),
-                                Text('$qte', style: const TextStyle(color: Colors.black87)),
-                                IconButton(
-                                  icon: const Icon(Icons.add, color: Colors.indigo),
-                                  onPressed: () => addToCart(product['id']),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+      body: Obx(() {
+        if (produitController.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final produits = produitController.produits.where((p) => selectedCategory == 'Tous' || p.categorie == selectedCategory).toList();
+
+        return Column(
+          children: [
+            SizedBox(
+              height: 90,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                children: [
+                  'Tous',
+                  ...{...produitController.produits.map((p) => p.categorie)}
+                ].map((cat) {
+                  final isSelected = cat == selectedCategory;
+                  return GestureDetector(
+                    onTap: () => setState(() => selectedCategory = cat),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      width: 100,
+                      margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.orange : Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(color: Colors.indigo, width: 1.2),
                       ),
-                    );
-                  },
-                );
-              },
+                      child: Center(
+                        child: Text(cat, style: TextStyle(color: isSelected ? Colors.white : Colors.indigo)),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.all(12),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.75,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemCount: produits.length,
+                itemBuilder: (context, index) {
+                  final p = produits[index];
+                  final qte = cart[p.id] ?? 0;
+                  return GestureDetector(
+                    onTap: () => showProductDetails(p),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                             child: Image.network("${AppApi.baseUrl}${p.images.first}"),)
+                             /* child: Image.network(
+                                p.images.isNotEmpty ? p.images.first : '',
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+                              ),
+                            ),*/
+                          ),
+                          const SizedBox(height: 8),
+                          Text(p.nom, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          Text("${p.prix} €", style: const TextStyle(color: Colors.grey)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              IconButton(
+                                onPressed: () => removeFromCart(p.id),
+                                icon: const Icon(Icons.remove_circle_outline, color: Colors.indigo),
+                              ),
+                              Text('$qte', style: const TextStyle(fontSize: 16)),
+                              IconButton(
+                                onPressed: () => addToCart(p.id),
+                                icon: const Icon(Icons.add_circle_outline, color: Colors.indigo),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            )
+          ],
+        );
+      }),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          if (cartItemCount == 0) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Le panier est vide")),
+            );
+          } else {
+            Get.toNamed('/select-client', arguments: {'cart': cart});
+          }
+        },
+        label: const Text("Continuer"),
+        icon: const Icon(Icons.add_shopping_cart),
+        backgroundColor: Colors.indigo,
       ),
     );
   }
