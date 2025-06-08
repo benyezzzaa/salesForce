@@ -11,22 +11,38 @@ class CommercialController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    print('CommercialController onInit called. Fetching data...');
     fetchData();
   }
 
   void fetchData() async {
+    print('fetchData started.');
     try {
+      print('Fetching objectifs...');
       final objectifs = await service.getGroupedByYear();
-      final sales = await service.getSalesByCategory();
-      final reclamations = 3; // 🧪 à adapter selon API
+      print('Objectifs fetched: ${objectifs.length} groups.');
 
-      homeData.value = HomeModel(
+      print('Fetching sales...');
+      final sales = await service.getSalesByCategory();
+      print('Sales fetched: ${sales.length} categories.');
+
+      final reclamations = 3; // 🧪 à adapter selon API
+      print('Reclamations count (hardcoded): $reclamations.');
+
+      final fetchedHomeData = HomeModel(
         objectifsGroupedByYear: objectifs,
         salesByCategory: sales,
         reclamationsCount: reclamations,
       );
+      homeData.value = fetchedHomeData;
+      print('homeData updated with new data.');
+
     } catch (e) {
-      print("❌ Erreur lors du chargement des données: $e");
+      print("❌ Erreur lors du chargement des données dans CommercialController: $e");
+      // Optionally, you could set an error message observable here
+      // errorMessage.value = 'Failed to load data';
+    } finally {
+      print('fetchData finished.');
     }
   }
 

@@ -6,6 +6,16 @@ import '../models/raison_model.dart';
 import '../models/visite_model.dart';
 import '../models/circuit_model.dart';
 
+class Result<T> {
+  final T? data;
+  final String? error;
+
+  Result.success(this.data) : error = null;
+  Result.error(this.error) : data = null;
+
+  bool get isSuccess => error == null;
+}
+
 class VisiteService {
 
 
@@ -43,55 +53,71 @@ class VisiteService {
     }
   }
 
-  Future<VisiteModel> createVisite({
+  Future<Result<VisiteModel>> createVisite({
     required String token,
     required DateTime date,
     required int clientId,
     required int raisonId,
   }) async {
-    final response = await http.post(
-      Uri.parse('${AppApi.baseUrl}/visites'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'date': date.toIso8601String(),
-        'clientId': clientId,
-        'raisonId': raisonId,
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('${AppApi.baseUrl}/visites'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'date': date.toIso8601String(),
+          'clientId': clientId,
+          'raisonId': raisonId,
+        }),
+      );
 
-    if (response.statusCode == 201) {
-      return VisiteModel.fromJson(json.decode(response.body));
-    } else {
-      print('Failed to create visite - Status Code: ${response.statusCode}');
-      print('Response Body: ${response.body}');
-      throw Exception('Failed to create visite');
+      if (response.statusCode == 201) {
+        return Result.success(VisiteModel.fromJson(json.decode(response.body)));
+      } else {
+        final errorData = json.decode(response.body);
+        final errorMessage = errorData['message'] ?? 'Failed to create visite';
+        print('Failed to create visite - Status Code: ${response.statusCode}');
+        print('Error Message: $errorMessage');
+        return Result.error(errorMessage);
+      }
+    } catch (e) {
+      print('Exception during visite creation: $e');
+      return Result.error('Une erreur est survenue lors de la création de la visite');
     }
   }
 
-  Future<CircuitModel> createCircuit({
+  Future<Result<CircuitModel>> createCircuit({
     required String token,
     required DateTime date,
     required int clientId,
   }) async {
-    final response = await http.post(
-      Uri.parse('${AppApi.baseUrl}/circuits'),
-      headers: {
-        'Authorization': 'Bearer $token',
-         'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'date': date.toIso8601String().split('T').first, // Format YYYY-MM-DD
-        'clientIds': [clientId],
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('${AppApi.baseUrl}/circuits'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'date': date.toIso8601String().split('T').first,
+          'clientIds': [clientId],
+        }),
+      );
 
-    if (response.statusCode == 201) {
-      return CircuitModel.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to create circuit');
+      if (response.statusCode == 201) {
+        return Result.success(CircuitModel.fromJson(json.decode(response.body)));
+      } else {
+        final errorData = json.decode(response.body);
+        final errorMessage = errorData['message'] ?? 'Failed to create circuit';
+        print('Failed to create circuit - Status Code: ${response.statusCode}');
+        print('Error Message: $errorMessage');
+        return Result.error(errorMessage);
+      }
+    } catch (e) {
+      print('Exception during circuit creation: $e');
+      return Result.error('Une erreur est survenue lors de la création du circuit');
     }
   }
 } 

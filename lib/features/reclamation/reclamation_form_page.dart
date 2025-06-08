@@ -10,67 +10,131 @@ class ReclamationFormPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme; // Get color scheme
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Nouvelle réclamation")),
+      backgroundColor: colorScheme.background, // Use background color
+      appBar: AppBar(
+        title: Text("Nouvelle réclamation", style: TextStyle(color: colorScheme.onPrimary)), // Use onPrimary
+        backgroundColor: colorScheme.primary, // Use primary color
+        iconTheme: IconThemeData(color: colorScheme.onPrimary), // Use onPrimary for back button
+        elevation: 2, // Consistent elevation
+      ),
 
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator(color: colorScheme.primary)); // Use primary color
         }
 
+        // Handle error state if available in controller
+        // if (controller.errorMessage.isNotEmpty) {
+        //   return Center(
+        //     child: Text(
+        //       controller.errorMessage.value,
+        //       textAlign: TextAlign.center,
+        //       style: TextStyle(color: colorScheme.error, fontSize: 16),
+        //     ),
+        //   );
+        // }
+
         return Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16), // Consistent padding
           child: Form(
             key: controller.formKey,
             child: ListView(
               children: [
-                const Text("Client concerné :", style: TextStyle(fontSize: 16)),
-                const SizedBox(height: 10),
+                Text("Client concerné :", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: colorScheme.onSurface)), // Use onSurface
+                const SizedBox(height: 10), // Consistent spacing
                 DropdownButtonFormField<int>(
                   value: controller.selectedClientId.value,
                   onChanged: (val) => controller.selectedClientId.value = val!,
                   items: controller.clients
                       .map((c) => DropdownMenuItem<int>(
                             value: c['id'],
-                            child: Text(c['nom']),
+                            child: Text(c['nom'] ?? 'Client inconnu', style: TextStyle(color: colorScheme.onSurface)), // Use onSurface
                           ))
                       .toList(),
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                       borderRadius: BorderRadius.circular(8), // Consistent border radius
+                       borderSide: BorderSide(color: colorScheme.outlineVariant), // Use outlineVariant
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                       borderRadius: BorderRadius.circular(8), // Consistent border radius
+                       borderSide: BorderSide(color: colorScheme.primary, width: 2), // Use primary
+                    ),
+                     filled: true,
+                     fillColor: colorScheme.surfaceContainerLow, // Use subtle surface color
                     hintText: 'Sélectionner un client',
+                     hintStyle: TextStyle(color: colorScheme.onSurfaceVariant), // Use onSurfaceVariant
+                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15), // Adjusted padding
                   ),
+                   style: TextStyle(color: colorScheme.onSurface), // Use onSurface
                   validator: (val) =>
                       val == null ? 'Client requis' : null,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 20), // Consistent spacing
 
                 TextFormField(
                   controller: controller.sujetController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Sujet',
-                    border: OutlineInputBorder(),
+                     labelStyle: TextStyle(color: colorScheme.onSurfaceVariant), // Use onSurfaceVariant
+                    border: OutlineInputBorder(
+                       borderRadius: BorderRadius.circular(8), // Consistent border radius
+                       borderSide: BorderSide(color: colorScheme.outlineVariant), // Use outlineVariant
+                    ),
+                     focusedBorder: OutlineInputBorder(
+                       borderRadius: BorderRadius.circular(8), // Consistent border radius
+                       borderSide: BorderSide(color: colorScheme.primary, width: 2), // Use primary
+                    ),
+                     filled: true,
+                     fillColor: colorScheme.surfaceContainerLow, // Use subtle surface color
+                     hintStyle: TextStyle(color: colorScheme.onSurfaceVariant), // Use onSurfaceVariant
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15), // Adjusted padding
                   ),
+                   style: TextStyle(color: colorScheme.onSurface), // Use onSurface
                   validator: (val) =>
                       val == null || val.isEmpty ? 'Sujet requis' : null,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 20), // Consistent spacing
 
                 TextFormField(
                   controller: controller.descriptionController,
                   maxLines: 5,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Description',
-                    border: OutlineInputBorder(),
+                     labelStyle: TextStyle(color: colorScheme.onSurfaceVariant), // Use onSurfaceVariant
+                    border: OutlineInputBorder(
+                       borderRadius: BorderRadius.circular(8), // Consistent border radius
+                       borderSide: BorderSide(color: colorScheme.outlineVariant), // Use outlineVariant
+                    ),
+                     focusedBorder: OutlineInputBorder(
+                       borderRadius: BorderRadius.circular(8), // Consistent border radius
+                       borderSide: BorderSide(color: colorScheme.primary, width: 2), // Use primary
+                    ),
+                     filled: true,
+                     fillColor: colorScheme.surfaceContainerLow, // Use subtle surface color
+                     hintStyle: TextStyle(color: colorScheme.onSurfaceVariant), // Use onSurfaceVariant
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15), // Adjusted padding
                   ),
+                   style: TextStyle(color: colorScheme.onSurface), // Use onSurface
                   validator: (val) =>
                       val == null || val.isEmpty ? 'Description requise' : null,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 20), // Consistent spacing
 
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.send),
-                  label: const Text("Envoyer"),
-                  onPressed: controller.submitReclamation,
+                  icon: Icon(Icons.send, color: colorScheme.onPrimary), // Use onPrimary
+                  label: Text("Envoyer", style: TextStyle(fontSize: 16)), // Consistent font size
+                  onPressed: controller.isLoading.value ? null : controller.submitReclamation, // Disable while loading
+                   style: ElevatedButton.styleFrom(
+                     backgroundColor: colorScheme.primary, // Use primary color
+                     foregroundColor: colorScheme.onPrimary, // Use onPrimary
+                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Consistent border radius
+                     padding: const EdgeInsets.symmetric(vertical: 16), // Consistent padding
+                     elevation: 4, // Consistent elevation
+                   ),
                 )
               ],
             ),

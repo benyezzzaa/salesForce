@@ -53,28 +53,33 @@ class VisiteController extends GetxController {
       return false;
     }
 
+    isLoading.value = true;
+    error.value = '';
+    
     try {
-      isLoading.value = true;
-      error.value = '';
-      
       final token = StorageService.getToken();
       if (token == null) {
         error.value = 'Token non trouvé. Veuillez vous reconnecter.';
         return false;
       }
       
-      await _service.createVisite(
+      final visiteResult = await _service.createVisite(
         token: token,
         date: selectedDate.value,
         clientId: selectedClient!.id,
         raisonId: selectedRaison!.id,
       );
 
-      await createCircuit();
+      if (visiteResult.isSuccess) {
+        await createCircuit();
+        return true;
+      } else {
+        error.value = visiteResult.error ?? 'Une erreur inconnue est survenue lors de la création de la visite.';
+        return false;
+      }
       
-      return true;
     } catch (e) {
-      error.value = e.toString();
+      error.value = 'Erreur inattendue lors de la création de la visite : ${e.toString()}';
       return false;
     } finally {
       isLoading.value = false;
@@ -87,6 +92,8 @@ class VisiteController extends GetxController {
       return;
     }
 
+    error.value = '';
+
     try {
       final token = StorageService.getToken();
       if (token == null) {
@@ -94,16 +101,20 @@ class VisiteController extends GetxController {
         return;
       }
 
-      final circuit = await _service.createCircuit(
+      final circuitResult = await _service.createCircuit(
         token: token,
         date: selectedDate.value,
         clientId: selectedClient!.id,
       );
 
-      Get.toNamed(AppRoutes.mapCircuit, arguments: circuit);
+      if (circuitResult.isSuccess) {
+        Get.toNamed(AppRoutes.mapCircuit, arguments: circuitResult.data);
+      } else {
+        error.value = circuitResult.error ?? 'Une erreur inconnue est survenue lors de la création du circuit.';
+      }
 
     } catch (e) {
-      error.value = 'Erreur lors de la création du circuit: ${e.toString()}';
+      error.value = 'Erreur inattendue lors de la création du circuit: ${e.toString()}';
     }
   }
 

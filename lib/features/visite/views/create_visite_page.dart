@@ -10,22 +10,25 @@ class CreateVisitePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(VisiteController());
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nouvelle Visite'),
-        backgroundColor: Colors.indigo.shade600,
+        title: Text('Nouvelle Visite', style: TextStyle(color: colorScheme.onPrimary)),
+        backgroundColor: colorScheme.primary,
+        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        elevation: 2,
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator(color: colorScheme.primary));
         }
 
         if (controller.error.isNotEmpty) {
           return Center(
             child: Text(
               controller.error.value,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: colorScheme.error),
             ),
           );
         }
@@ -35,31 +38,177 @@ class CreateVisitePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildDatePicker(context, controller),
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                color: colorScheme.surface,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Date de visite',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      InkWell(
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: controller.selectedDate.value,
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(const Duration(days: 365)),
+                            builder: (context, child) {
+                              return Theme(
+                                data: Theme.of(context).copyWith(
+                                  colorScheme: colorScheme,
+                                  dialogBackgroundColor: colorScheme.surface,
+                                ),
+                                child: child!,
+                              );
+                            },
+                          );
+                          if (date != null) {
+                            controller.setDate(date);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: colorScheme.outlineVariant),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${controller.selectedDate.value.day}/${controller.selectedDate.value.month}/${controller.selectedDate.value.year}',
+                                style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
+                              ),
+                              Icon(Icons.calendar_today, color: colorScheme.onSurfaceVariant),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: 20),
-              _buildClientDropdown(controller),
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                color: colorScheme.surface,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Client',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<ClientModel>(
+                        value: controller.selectedClient,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: colorScheme.outlineVariant),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                          filled: true,
+                          fillColor: colorScheme.surfaceContainerLow,
+                        ),
+                        items: controller.clients.map((client) {
+                          return DropdownMenuItem(
+                            value: client,
+                            child: Text(client.fullName, style: TextStyle(color: colorScheme.onSurface)),
+                          );
+                        }).toList(),
+                        onChanged: (client) => controller.setClient(client),
+                        hint: Text('Sélectionnez un client', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                        dropdownColor: colorScheme.surface,
+                        icon: Icon(Icons.arrow_drop_down, color: colorScheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: 20),
-              _buildRaisonDropdown(controller),
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                color: colorScheme.surface,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Raison de visite',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<RaisonModel>(
+                        value: controller.selectedRaison,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: colorScheme.outlineVariant),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                          filled: true,
+                          fillColor: colorScheme.surfaceContainerLow,
+                        ),
+                        items: controller.raisons.map((raison) {
+                          return DropdownMenuItem(
+                            value: raison,
+                            child: Text(raison.nom, style: TextStyle(color: colorScheme.onSurface)),
+                          );
+                        }).toList(),
+                        onChanged: (raison) => controller.setRaison(raison),
+                        hint: Text('Sélectionnez une raison', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                        dropdownColor: colorScheme.surface,
+                        icon: Icon(Icons.arrow_drop_down, color: colorScheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () async {
-                  final success = await controller.createVisite();
-                  // La navigation et le snackbar sont maintenant gérés dans le contrôleur après la création du circuit.
-                  // if (success) {
-                  //   Get.back(result: true);
-                  //   Get.snackbar(
-                  //     'Succès',
-                  //     'Visite créée avec succès',
-                  //     backgroundColor: Colors.green,
-                  //     colorText: Colors.white,
-                  //   );
-                  // }
+                  if (!controller.isLoading.value) {
+                    await controller.createVisite();
+                  }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo,
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 4,
                 ),
-                child: const Text(
+                child: controller.isLoading.value ?
+                 SizedBox(
+                   width: 20,
+                   height: 20,
+                   child: CircularProgressIndicator(color: colorScheme.onPrimary, strokeWidth: 2),
+                 ) : const Text(
                   'Créer la visite',
                   style: TextStyle(fontSize: 16),
                 ),
@@ -68,133 +217,6 @@ class CreateVisitePage extends StatelessWidget {
           ),
         );
       }),
-    );
-  }
-
-  Widget _buildDatePicker(BuildContext context, VisiteController controller) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Date de visite',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            InkWell(
-              onTap: () async {
-                final date = await showDatePicker(
-                  context: context,
-                  initialDate: controller.selectedDate.value,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                );
-                if (date != null) {
-                  controller.setDate(date);
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${controller.selectedDate.value.day}/${controller.selectedDate.value.month}/${controller.selectedDate.value.year}',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const Icon(Icons.calendar_today),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildClientDropdown(VisiteController controller) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Client',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<ClientModel>(
-              value: controller.selectedClient,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-              items: controller.clients.map((client) {
-                return DropdownMenuItem(
-                  value: client,
-                  child: Text(client.fullName),
-                );
-              }).toList(),
-              onChanged: (client) => controller.setClient(client),
-              hint: const Text('Sélectionnez un client'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRaisonDropdown(VisiteController controller) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Raison de visite',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<RaisonModel>(
-              value: controller.selectedRaison,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-              items: controller.raisons.map((raison) {
-                return DropdownMenuItem(
-                  value: raison,
-                  child: Text(raison.nom),
-                );
-              }).toList(),
-              onChanged: (raison) => controller.setRaison(raison),
-              hint: const Text('Sélectionnez une raison'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 } 

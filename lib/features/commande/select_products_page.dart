@@ -22,7 +22,9 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
   @override
   void initState() {
     super.initState();
-    produitController.fetchProduits();
+    if (produitController.produits.isEmpty) {
+      produitController.fetchProduits();
+    }
   }
 
   void addToCart(int productId) {
@@ -41,25 +43,33 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
 
   int get cartItemCount => cart.values.fold(0, (sum, qte) => sum + qte);
 
-  void showProductDetails(ProduitModel product) {
+  void showProductDetails(BuildContext context, ProduitModel product) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: colorScheme.surface,
         contentPadding: const EdgeInsets.all(20),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.network("${AppApi.baseUrl}${product.images.first}"),
+              child: Image.network(
+                "${AppApi.baseUrl}${product.images.first}",
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(Icons.image_not_supported, size: 100, color: colorScheme.onSurfaceVariant);
+                },
+              ),
             ),
             const SizedBox(height: 12),
-            Text(product.nom, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(product.nom, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
             const SizedBox(height: 8),
-            Text("Prix : ${product.prix} €", style: const TextStyle(color: Colors.grey)),
+            Text("Prix : ${product.prix} €", style: TextStyle(color: colorScheme.onSurfaceVariant)),
             const SizedBox(height: 8),
-            Text(product.description, textAlign: TextAlign.center, style: const TextStyle(fontSize: 14)),
+            Text(product.description, textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: colorScheme.onSurface)),
           ],
         ),
         actions: [
@@ -68,13 +78,13 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
               addToCart(product.id);
               Navigator.pop(context);
             },
-            icon: const Icon(Icons.add_shopping_cart),
-            label: const Text("Ajouter au panier"),
+            icon: Icon(Icons.add_shopping_cart, color: colorScheme.onPrimary),
+            label: Text("Ajouter au panier", style: TextStyle(color: colorScheme.onPrimary)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.indigo,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              backgroundColor: colorScheme.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              elevation: 4,
             ),
           ),
         ],
@@ -82,14 +92,17 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
     );
   }
 
-  void showCartDialog() {
+  void showCartDialog(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final produits = produitController.produits;
     final selectedProducts = produits.where((p) => cart[p.id] != null && cart[p.id]! > 0).toList();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("🛒 Panier"),
+        title: Text("🛒 Panier", style: TextStyle(color: colorScheme.onSurface)),
+        backgroundColor: colorScheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView(
@@ -98,9 +111,9 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
               final qte = cart[p.id] ?? 0;
               final total = (p.prix * qte).toStringAsFixed(2);
               return ListTile(
-                title: Text(p.nom),
-                subtitle: Text("Quantité : \$qte  |  Prix unitaire : \${p.prix} €"),
-                trailing: Text("=\$total €", style: const TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(p.nom, style: TextStyle(color: colorScheme.onSurface)),
+                subtitle: Text("Quantité : \$qte  |  Prix unitaire : \${p.prix} €", style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                trailing: Text("=\$total €", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
               );
             }).toList(),
           ),
@@ -108,7 +121,7 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Fermer"),
+            child: Text("Fermer", style: TextStyle(color: colorScheme.primary)),
           ),
         ],
       ),
@@ -117,18 +130,21 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF4F6FA),
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
-        backgroundColor: Colors.indigo.shade400,
-        title: const Text("Sélection des produits", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: colorScheme.primary,
+        title: Text("Sélection des produits", style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        elevation: 2,
         actions: [
           Stack(
             children: [
               IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: showCartDialog,
+                icon: Icon(Icons.shopping_cart, color: colorScheme.onPrimary),
+                onPressed: () => showCartDialog(context),
               ),
               if (cartItemCount > 0)
                 Positioned(
@@ -136,8 +152,8 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
                   top: 4,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                    child: Text('$cartItemCount', style: const TextStyle(fontSize: 12, color: Colors.white)),
+                    decoration: BoxDecoration(color: colorScheme.error, shape: BoxShape.circle),
+                    child: Text('$cartItemCount', style: TextStyle(fontSize: 12, color: colorScheme.onError)),
                   ),
                 ),
             ],
@@ -146,7 +162,7 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
       ),
       body: Obx(() {
         if (produitController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator(color: colorScheme.primary));
         }
 
         final produits = produitController.produits.where((p) => selectedCategory == 'Tous' || p.categorie == selectedCategory).toList();
@@ -154,28 +170,35 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
         return Column(
           children: [
             SizedBox(
-              height: 90,
+              height: 70,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: [
                   'Tous',
                   ...{...produitController.produits.map((p) => p.categorie)}
-                ].map((cat) {
+                ].toSet().toList().map((cat) {
                   final isSelected = cat == selectedCategory;
                   return GestureDetector(
                     onTap: () => setState(() => selectedCategory = cat),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       width: 100,
-                      margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+                      margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.orange : Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: Colors.indigo, width: 1.2),
+                        color: isSelected ? colorScheme.primary : colorScheme.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
+                          width: 1.5,
+                        ),
+                        boxShadow: isSelected ? [BoxShadow(color: colorScheme.primary.withOpacity(0.3), blurRadius: 6, offset: Offset(0, 3))] : [],
                       ),
                       child: Center(
-                        child: Text(cat, style: TextStyle(color: isSelected ? Colors.white : Colors.indigo)),
+                        child: Text(
+                          cat,
+                          style: TextStyle(color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                        ),
                       ),
                     ),
                   );
@@ -196,47 +219,45 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
                   final p = produits[index];
                   final qte = cart[p.id] ?? 0;
                   return GestureDetector(
-                    onTap: () => showProductDetails(p),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                             child: Image.network("${AppApi.baseUrl}${p.images.first}"),)
-                             /* child: Image.network(
-                                p.images.isNotEmpty ? p.images.first : '',
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+                    onTap: () => showProductDetails(context, p),
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      color: colorScheme.surface,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network("${AppApi.baseUrl}${p.images.first}", fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(Icons.image_not_supported, size: 80, color: colorScheme.onSurfaceVariant);
+                                  },
+                                ),
                               ),
-                            ),*/
-                          ),
-                          const SizedBox(height: 8),
-                          Text(p.nom, style: const TextStyle(fontWeight: FontWeight.w600)),
-                          Text("${p.prix} €", style: const TextStyle(color: Colors.grey)),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              IconButton(
-                                onPressed: () => removeFromCart(p.id),
-                                icon: const Icon(Icons.remove_circle_outline, color: Colors.indigo),
-                              ),
-                              Text('$qte', style: const TextStyle(fontSize: 16)),
-                              IconButton(
-                                onPressed: () => addToCart(p.id),
-                                icon: const Icon(Icons.add_circle_outline, color: Colors.indigo),
-                              ),
-                            ],
-                          )
-                        ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(p.nom, style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
+                            Text("${p.prix} €", style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                IconButton(
+                                  onPressed: () => removeFromCart(p.id),
+                                  icon: Icon(Icons.remove_circle_outline, color: colorScheme.error),
+                                ),
+                                Text('$qte', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colorScheme.primary)),
+                                IconButton(
+                                  onPressed: () => addToCart(p.id),
+                                  icon: Icon(Icons.add_circle_outline, color: colorScheme.tertiary),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -246,20 +267,16 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
           ],
         );
       }),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: cartItemCount > 0 ? FloatingActionButton.extended(
         onPressed: () {
-          if (cartItemCount == 0) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Le panier est vide")),
-            );
-          } else {
-            Get.toNamed('/select-client', arguments: {'cart': cart});
-          }
+          Get.toNamed('/select-client');
         },
-        label: const Text("Continuer"),
-        icon: const Icon(Icons.add_shopping_cart),
-        backgroundColor: Colors.indigo,
-      ),
+        label: Text('Sélectionner Client', style: TextStyle(color: colorScheme.onPrimary)),
+        icon: Icon(Icons.arrow_forward, color: colorScheme.onPrimary),
+        backgroundColor: colorScheme.primary,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ) : null,
     );
   }
 }

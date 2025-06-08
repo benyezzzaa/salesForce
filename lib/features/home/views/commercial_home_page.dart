@@ -225,6 +225,8 @@ class CommercialHomePage extends StatelessWidget {
             _buildCard(context, Icons.place, "Visites", '/visite/create'),
             _buildCard(context, Icons.group, "Clients", '/clients'),
             _buildCard(context, Icons.shopping_cart, "Commandes", '/commandes'),
+            
+
           ],
         ),
       ),
@@ -265,7 +267,7 @@ class CommercialHomePage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildBottomIcon(context, Icons.notifications, "Notifications", '/notifications'),
-          _buildBottomIcon(context, Icons.description_outlined, "Documents", '/documents'),
+          _buildBottomIcon(context, Icons.description_outlined, "Documents", '/documents-valides'),
           _buildBottomIcon(context, Icons.library_books, "Catalogue", '/catalogue'),
           _buildBottomIcon(context, Icons.person, "Profil", '/profil'),
         ],
@@ -275,7 +277,13 @@ class CommercialHomePage extends StatelessWidget {
 
   Widget _buildBottomIcon(BuildContext context, IconData icon, String label, String route) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, route),
+      onTap: () {
+        if (route != null) {
+          Navigator.pushNamed(context, route);
+        } else {
+          print('Navigation route for $label is null!');
+        }
+      },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,

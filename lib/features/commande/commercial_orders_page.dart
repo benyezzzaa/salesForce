@@ -29,6 +29,9 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
     _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     _fadeAnimation = CurvedAnimation(parent: _animationController, curve: Curves.easeIn);
     _animationController.forward();
+    if (controller.commandes.isEmpty) {
+      controller.fetchCommandes();
+    }
   }
 
   @override
@@ -39,65 +42,61 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundGradient = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: isDark
-          ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
-          : [const Color(0xFFF0F4FF), const Color(0xFFE0E7FF)],
-    );
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(gradient: backgroundGradient),
+        color: colorScheme.background,
         child: Column(
           children: [
             AppBar(
-              backgroundColor: Colors.indigo.shade400,
-              title: const Text('Mes Commandes', style: TextStyle(color: Colors.white)),
+              backgroundColor: colorScheme.primary,
+              title: Text('Mes Commandes', style: TextStyle(color: colorScheme.onPrimary)),
               actions: [
                 IconButton(
                   icon: Icon(
                     showOnlyValidated ? Icons.filter_alt_off : Icons.filter_alt,
-                    color: Colors.white,
+                    color: colorScheme.onPrimary,
                   ),
                   tooltip: showOnlyValidated ? 'Afficher tout' : 'Filtrer : Validées',
                   onPressed: () => setState(() => showOnlyValidated = !showOnlyValidated),
                 ),
                 PopupMenuButton<String>(
                   onSelected: (value) => setState(() => sortMode = value),
-                  icon: const Icon(Icons.sort, color: Colors.white),
+                  icon: Icon(Icons.sort, color: colorScheme.onPrimary),
                   itemBuilder: (context) => [
-                    const PopupMenuItem(value: 'date', child: Text('Trier par date')),
-                    const PopupMenuItem(value: 'montant', child: Text('Trier par montant')),
+                    PopupMenuItem(value: 'date', child: Text('Trier par date', style: TextStyle(color: colorScheme.onSurface))),
+                    PopupMenuItem(value: 'montant', child: Text('Trier par montant', style: TextStyle(color: colorScheme.onSurface))),
                   ],
                 ),
                 IconButton(
-                  icon: const Icon(Icons.add_circle_outline, size: 28),
+                  icon: Icon(Icons.add_circle_outline, size: 28, color: colorScheme.onPrimary),
                   tooltip: 'Nouvelle commande',
                   onPressed: () => Get.toNamed('/select-products'),
                 )
               ],
-              iconTheme: const IconThemeData(color: Colors.white),
+              iconTheme: IconThemeData(color: colorScheme.onPrimary),
+              elevation: 2,
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16.0),
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Rechercher une commande ou un client...',
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
                   filled: true,
-                  fillColor: isDark ? Colors.white10 : Colors.white,
+                  fillColor: colorScheme.surfaceContainerLow,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
                 ),
+                style: TextStyle(color: colorScheme.onSurface),
                 onChanged: (val) => setState(() => searchQuery = val),
               ),
             ),
             Expanded(
               child: Obx(() {
                 if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator(color: colorScheme.primary));
                 }
                 var filtered = (showOnlyValidated
                         ? controller.commandes.where((c) => c.statut == 'validée')
@@ -114,62 +113,55 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
                 }
 
                 if (filtered.isEmpty) {
-                  return const Center(child: Text("Aucune commande trouvée"));
+                  return Center(child: Text("Aucune commande trouvée", style: TextStyle(color: colorScheme.onSurfaceVariant)));
                 }
 
                 return FadeTransition(
                   opacity: _fadeAnimation,
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final cmd = filtered[index];
                       final isValid = cmd.statut == 'validée';
 
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.indigo.shade900.withOpacity(0.2) : Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 6,
-                              offset: const Offset(0, 3),
-                            )
-                          ],
-                        ),
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        color: colorScheme.surface,
                         child: ListTile(
                           contentPadding: const EdgeInsets.all(16),
                           title: Text(
                             "Commande ${cmd.numeroCommande}",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 4),
-                              Text("Client : ${cmd.clientNom}"),
-                              Text("Date : ${cmd.dateCreation}"),
+                              Text("Client : ${cmd.clientNom}", style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                              Text("Date : ${cmd.dateCreation}", style: TextStyle(color: colorScheme.onSurfaceVariant)),
                             ],
                           ),
                           trailing: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: isValid ? Colors.green : Colors.orange,
+                                  color: isValid ? colorScheme.tertiaryContainer : colorScheme.secondaryContainer,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
                                   isValid ? 'Validée' : 'En attente',
-                                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                                  style: TextStyle(color: isValid ? colorScheme.onTertiaryContainer : colorScheme.onSecondaryContainer, fontSize: 12, fontWeight: FontWeight.w600),
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text("${cmd.prixTotalTTC.toStringAsFixed(2)} DT",
-                                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
                             ],
                           ),
                           onTap: () => Navigator.push(

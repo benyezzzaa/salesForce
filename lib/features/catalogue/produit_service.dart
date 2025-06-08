@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:pfe/core/utils/app_api.dart';
 
 class ProduitService {
   final Dio dio = Dio();
@@ -13,7 +14,7 @@ class ProduitService {
     }
 
     final response = await dio.get(
-      'http://localhost:4000/produits',
+      '${AppApi.baseUrl}/produits',
       options: Options(headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',

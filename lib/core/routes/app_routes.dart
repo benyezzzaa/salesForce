@@ -5,12 +5,14 @@ import 'package:pfe/features/clients/clients_page.dart';
 import 'package:pfe/features/commande/commercial_orders_page.dart';
 import 'package:pfe/features/commande/select_client_page.dart';
 import 'package:pfe/features/commande/select_products_page.dart';
+import 'package:pfe/features/documents/documents_valides_page.dart';
 import 'package:pfe/features/home/views/commercial_home_page.dart';
 import 'package:pfe/features/reclamation/reclamation_form_page.dart';
 import 'package:pfe/features/reclamation/reclamation_home_page.dart';
 import 'package:pfe/features/reclamation/reclamations_page.dart';
 import 'package:pfe/features/visite/views/create_visite_page.dart';
 import 'package:pfe/features/visite/views/map_circuit_page.dart';
+import 'package:pfe/features/notifications/notifications_page.dart';
 
 
 class AppRoutes {
@@ -28,6 +30,8 @@ class AppRoutes {
   static const reclamationHome = '/reclamations/home';
   static const cataloguePage = '/catalogue';
   static const visiteCreate = '/visite/create';
+  static const notificationsPage = '/notifications';
+  static const documentsValidesPage = '/documents-valides';
 }
 
 class AppPages {
@@ -45,5 +49,8 @@ class AppPages {
     GetPage(name: AppRoutes.cataloguePage, page: () => const CataloguePage()),
     GetPage(name: AppRoutes.visiteCreate, page: () => const CreateVisitePage()),
     GetPage(name: AppRoutes.mapCircuit, page: () => const MapCircuitPage()),
+    GetPage(name: AppRoutes.notificationsPage, page: () => const NotificationsPage()),
+    GetPage(name: AppRoutes.documentsValidesPage, page: () => const DocumentsValidesPage()),
+    
   ];
 }
