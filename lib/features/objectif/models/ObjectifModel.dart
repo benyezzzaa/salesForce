@@ -1,8 +1,8 @@
 class ObjectifModel {
   final int id;
   final String categorie;
-  final double? objectif; // cible en pourcentage
-  final double realise; // réalisé en pourcentage
+  final double objectif;
+  final double realise;
   final bool atteint;
 
   ObjectifModel({
@@ -16,9 +16,9 @@ class ObjectifModel {
   factory ObjectifModel.fromJson(Map<String, dynamic> json) {
     return ObjectifModel(
       id: json['id'],
-      categorie: json['categorie'] ?? '',
-      objectif: (json['objectif'] as num?)?.toDouble(),
-      realise: (json['realise'] as num).toDouble(),
+      categorie: json['categorie'] ?? 'N/A',
+      objectif: (json['objectif'] ?? 0).toDouble(),
+      realise: (json['realise'] ?? 0).toDouble(),
       atteint: json['atteint'] ?? false,
     );
   }

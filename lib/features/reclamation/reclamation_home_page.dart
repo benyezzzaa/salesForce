@@ -1,52 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pfe/features/reclamation/controller/reclamation_controller.dart';
 
 class ReclamationHomePage extends StatelessWidget {
   const ReclamationHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme; // Get color scheme
+    final colorScheme = Theme.of(context).colorScheme;
+    final controller = Get.put(ReclamationController());
 
     return Scaffold(
-      backgroundColor: colorScheme.background, // Use background color
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
-        title: Text("Réclamations", style: TextStyle(color: colorScheme.onPrimary)), // Use onPrimary
-        backgroundColor: colorScheme.primary, // Use primary color
-        iconTheme: IconThemeData(color: colorScheme.onPrimary), // Use onPrimary for back button
-        elevation: 2, // Consistent elevation
+        title: Text("Réclamations", style: TextStyle(color: colorScheme.onPrimary)),
+        backgroundColor: colorScheme.primary,
+        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        elevation: 2,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24), // Increased padding
+        padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Center vertically
-          crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch buttons horizontally
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text("Que souhaitez-vous faire ?", textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onSurface)), // Use onSurface
-            const SizedBox(height: 40), // Increased spacing
-            ElevatedButton.icon(
-              icon: Icon(Icons.add_circle_outline, color: colorScheme.onPrimary), // Use onPrimary, adjusted icon
-              label: Text("Nouvelle réclamation", style: TextStyle(fontSize: 16)), // Consistent font size
-              onPressed: () => Get.toNamed('/reclamations/new'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary, // Use primary color
-                foregroundColor: colorScheme.onPrimary, // Use onPrimary
-                minimumSize: const Size.fromHeight(50), // Maintain height
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Consistent border radius
-                elevation: 4, // Consistent elevation
+            Text(
+              "Que souhaitez-vous faire ?",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 20), // Consistent spacing
+            const SizedBox(height: 40),
             ElevatedButton.icon(
-              icon: Icon(Icons.list_alt, color: colorScheme.primary), // Use primary color, adjusted icon
-              label: Text("Mes réclamations", style: TextStyle(fontSize: 16, color: colorScheme.onSurface)), // Use onSurface
+              icon: Icon(Icons.add_circle_outline, color: colorScheme.onPrimary),
+              label: Text("Nouvelle réclamation", style: TextStyle(fontSize: 16)),
+              onPressed: () async {
+                final result = await Get.toNamed('/reclamations/new');
+                if (result == 'added') {
+                  await controller.fetchMyReclamations();
+                  Get.snackbar('Succès', 'Réclamation ajoutée avec succès ✅');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 4,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: Icon(Icons.list_alt, color: colorScheme.primary),
+              label: Text("Mes réclamations", style: TextStyle(fontSize: 16, color: colorScheme.onSurface)),
               onPressed: () => Get.toNamed('/reclamations/mes'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.surface, // Use surface color for secondary button
-                foregroundColor: colorScheme.onSurface, // Use onSurface
-                minimumSize: const Size.fromHeight(50), // Maintain height
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: colorScheme.outlineVariant)), // Consistent border radius, add outline
-                elevation: 2, // Slightly less elevation for secondary
+                backgroundColor: colorScheme.surface,
+                foregroundColor: colorScheme.onSurface,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: colorScheme.outlineVariant),
+                ),
+                elevation: 2,
               ),
             ),
           ],

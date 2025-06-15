@@ -2,7 +2,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pfe/core/utils/app_api.dart';
-import 'package:pfe/data/models/client_model.dart';
+import 'package:pfe/features/visite/models/client_model.dart';
 
 class ClientService {
   final Dio _dio = Dio(BaseOptions(baseUrl: AppApi.baseUrl));

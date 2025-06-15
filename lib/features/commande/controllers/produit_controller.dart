@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import '../services/produit_service.dart';
-import '../../../data/models/produit_model.dart';
+import '../models/produit_model.dart';
 
 class ProduitController extends GetxController {
   final produits = <ProduitModel>[].obs;

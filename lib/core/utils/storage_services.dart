@@ -6,4 +6,12 @@ class StorageService {
   static void saveToken(String token) => box.write('token', token);
   static String? getToken() => box.read('token');
   static void clearToken() => box.remove('token');
+
+   static void saveUser(Map<String, dynamic> userData) {
+    box.write('user', userData);
+  }
+
+  static Map<String, dynamic>? getUser() {
+    return box.read('user');
+  }
 }

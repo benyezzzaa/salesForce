@@ -1,61 +1,51 @@
 // 📁 lib/features/home/controller/commercial_controller.dart
 import 'package:get/get.dart';
 import 'package:pfe/features/home/Service/objectif_service.dart';
-import 'package:pfe/features/home/models/objectif_model.dart';
 import 'package:pfe/features/home/models/home_model.dart';
+import 'package:pfe/features/home/models/objectif_model.dart';
 
 class CommercialController extends GetxController {
   final ObjectifService service = ObjectifService();
   final homeData = Rx<HomeModel?>(null);
+  final RxInt notificationsCount = 0.obs; // ✅ Nouveau champ observable pour notifications
 
   @override
   void onInit() {
     super.onInit();
-    print('CommercialController onInit called. Fetching data...');
     fetchData();
+    fetchNotificationsCount(); // ✅ Appel de la méthode pour charger les notifications
   }
 
-  void fetchData() async {
-    print('fetchData started.');
+  Future<void> fetchData() async {
     try {
-      print('Fetching objectifs...');
-      final objectifs = await service.getGroupedByYear();
-      print('Objectifs fetched: ${objectifs.length} groups.');
+      final objectifs = await service.getObjectifsProgress();
+      final sales = <Map<String, dynamic>>[]; // À remplacer par appel réel
+      final reclamations = 3; // Exemple
 
-      print('Fetching sales...');
-      final sales = await service.getSalesByCategory();
-      print('Sales fetched: ${sales.length} categories.');
-
-      final reclamations = 3; // 🧪 à adapter selon API
-      print('Reclamations count (hardcoded): $reclamations.');
-
-      final fetchedHomeData = HomeModel(
-        objectifsGroupedByYear: objectifs,
+      final homeModel = HomeModel(
+        objectifs: objectifs,
         salesByCategory: sales,
         reclamationsCount: reclamations,
       );
-      homeData.value = fetchedHomeData;
-      print('homeData updated with new data.');
 
+      homeData.value = homeModel;
     } catch (e) {
-      print("❌ Erreur lors du chargement des données dans CommercialController: $e");
-      // Optionally, you could set an error message observable here
-      // errorMessage.value = 'Failed to load data';
-    } finally {
-      print('fetchData finished.');
+      print('Erreur fetchData: \$e');
     }
   }
 
-  // Getters pour faciliter l'accès aux données
-  Map<int, List<ObjectifModel>> get objectifsGroupedByYear => 
-      homeData.value?.objectifsGroupedByYear ?? {};
+  Future<void> fetchNotificationsCount() async {
+    try {
+      // Simule un appel backend à adapter avec ton ApiService
+      await Future.delayed(const Duration(milliseconds: 500));
+      notificationsCount.value = 4; // Valeur temporaire. Mets ici le vrai nombre
+    } catch (e) {
+      print('Erreur notifications: \$e');
+    }
+  }
 
-  List<Map<String, dynamic>> get salesByCategory => 
-      homeData.value?.salesByCategory ?? [];
-
-  int get reclamationsCount => 
-      homeData.value?.reclamationsCount ?? 0;
-
-  double get currentYearProgress => 
-      homeData.value?.currentYearProgress ?? 0.0;
+  List<ObjectifModel> get objectifs => homeData.value?.objectifs ?? [];
+  List<Map<String, dynamic>> get salesByCategory => homeData.value?.salesByCategory ?? [];
+  int get reclamationsCount => homeData.value?.reclamationsCount ?? 0;
+  double get currentYearProgress => homeData.value?.currentYearProgress ?? 0.0;
 }

@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import '../../../data/models/commande_model.dart';
+import '../models/commande_model.dart';
 import '../services/commande_service.dart';
 
 class CommandeController extends GetxController {

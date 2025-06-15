@@ -25,6 +25,7 @@ class ReclamationController extends GetxController {
   @override
   void onInit() {
     fetchClients();
+     fetchMyReclamations();
     super.onInit();
   }
 final RxList mesReclamations = [].obs;
@@ -51,28 +52,31 @@ Future<void> fetchMyReclamations() async {
     }
   }
 
-  Future<void> submitReclamation() async {
-    if (!formKey.currentState!.validate()) return;
+ Future<void> submitReclamation() async {
+  if (!formKey.currentState!.validate()) return;
 
-    try {
-      final res = await dio.post(
-        '/reclamations',
-        data: jsonEncode({
-          'clientId': selectedClientId.value,
-          'sujet': sujetController.text,
-          'description': descriptionController.text,
-        }),
-        options: Options(headers: headers),
-      );
+  try {
+    final res = await dio.post(
+      '/reclamations',
+      data: jsonEncode({
+        'clientId': selectedClientId.value,
+        'sujet': sujetController.text,
+        'description': descriptionController.text,
+      }),
+      options: Options(headers: headers),
+    );
 
-      if (res.statusCode == 201 || res.statusCode == 200) {
-        Get.snackbar('Succès', 'Réclamation envoyée ✅');
-        Get.back();
-      } else {
-        Get.snackbar('Erreur', 'Échec de l’envoi');
-      }
-    } catch (e) {
-      Get.snackbar('Erreur', 'Exception : $e');
+    if (res.statusCode == 201 || res.statusCode == 200) {
+      // ✅ Rafraîchir les réclamations après ajout
+      await fetchMyReclamations();
+
+      // ✅ Fermer le formulaire et passer un message de succès
+      Get.back(result: 'added'); // on envoie 'added' comme résultat
+    } else {
+      Get.snackbar('Erreur', 'Échec de l’envoi');
     }
+  } catch (e) {
+    Get.snackbar('Erreur', 'Exception : $e');
   }
+}
 }

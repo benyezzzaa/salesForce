@@ -71,6 +71,7 @@ class VisiteController extends GetxController {
       );
 
       if (visiteResult.isSuccess) {
+        print("vvvvvvvvvvvviiiiiiiiiiiiiiiiiiisssssssssssssit t3333333333adaaaaaaaaaaaa");
         await createCircuit();
         return true;
       } else {
@@ -107,11 +108,13 @@ class VisiteController extends GetxController {
         clientId: selectedClient!.id,
       );
 
-      if (circuitResult.isSuccess) {
-        Get.toNamed(AppRoutes.mapCircuit, arguments: circuitResult.data);
-      } else {
-        error.value = circuitResult.error ?? 'Une erreur inconnue est survenue lors de la création du circuit.';
-      }
+    
+      if (circuitResult.isSuccess && circuitResult.data != null && circuitResult.data!.clients.isNotEmpty) {
+    print("Circuit created successfully with valid client data");
+    Get.toNamed(AppRoutes.mapCircuit, arguments: circuitResult.data);
+} else {
+    error.value = 'Circuit créé, mais aucune donnée client valide trouvée.';
+}
 
     } catch (e) {
       error.value = 'Erreur inattendue lors de la création du circuit: ${e.toString()}';

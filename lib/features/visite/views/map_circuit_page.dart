@@ -17,20 +17,18 @@ class _MapCircuitPageState extends State<MapCircuitPage> {
   Position? currentPosition;
   String? _error;
 
-  // Récupérer les arguments de manière sûre
-  final CircuitModel? circuit = Get.arguments as CircuitModel?; 
+  final CircuitModel? circuit = Get.arguments as CircuitModel?;
 
   @override
   void initState() {
     super.initState();
-    // Vérifier la présence du circuit et des clients avant de tenter d'ajouter le marqueur et d'obtenir la position
     if (circuit == null || circuit!.clients.isEmpty) {
-       setState(() {
-         _error = 'Aucune donnée client valide trouvée pour afficher le circuit.';
-       });
+      setState(() {
+        _error = 'Aucune donnée client valide trouvée pour afficher le circuit.';
+      });
     } else {
-      _determinePosition(); // Obtenir la position de l'utilisateur
-      _addClientMarker(); // Ajouter le marqueur du client
+      _determinePosition();
+      _addClientMarker();
     }
   }
 
@@ -72,93 +70,88 @@ class _MapCircuitPageState extends State<MapCircuitPage> {
 
     try {
       currentPosition = await Geolocator.getCurrentPosition();
-       setState(() { // Mettre à jour l'interface après avoir obtenu la position
-         // Optionally add a marker for the user's position
+      setState(() {
         markers.add(Marker(
           markerId: const MarkerId('userLocation'),
           position: LatLng(currentPosition!.latitude, currentPosition!.longitude),
           infoWindow: const InfoWindow(title: 'Votre Position'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure), // Marqueur bleu pour l'utilisateur
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
         ));
-
-        // Move camera to user's location after getting it, or keep it centered on client
-        // mapController?.animateCamera(CameraUpdate.newLatLng(LatLng(currentPosition!.latitude, currentPosition!.longitude)));
       });
     } catch (e) {
-       setState(() {
+      setState(() {
         _error = 'Erreur lors de l\'obtention de la position: ${e.toString()}';
       });
     }
   }
 
   void _addClientMarker() {
-     // Ces vérifications sont déjà faites dans initState, mais on les garde pour plus de sécurité
-     if (circuit == null || circuit!.clients.isEmpty) {
-       setState(() {
-         _error = 'Aucune donnée client dans le circuit.';
-       });
-       return;
-     }
-    // Prenons le premier client du circuit pour l'afficher de manière sûre
+    if (circuit == null || circuit!.clients.isEmpty) {
+      setState(() {
+        _error = 'Aucune donnée client dans le circuit.';
+      });
+      return;
+    }
+
     final client = circuit!.clients.first;
-    final clientLocation = LatLng(client.latitude, client.longitude);
+   final lat = client.latitude!;
+final lng = client.longitude!;
+
 
     markers.add(Marker(
       markerId: MarkerId(client.id.toString()),
-      position: clientLocation,
+      position: LatLng(lat, lng),
       infoWindow: InfoWindow(title: client.fullName, snippet: client.adresse),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed), // Marqueur rouge pour le client
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
     ));
-     setState(() {}); // Mettre à jour l'interface pour afficher le marqueur
+
+    setState(() {});
   }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
-     // Center map on client location initially only if valid client data is available
-     if (circuit != null && circuit!.clients.isNotEmpty) {
-       final client = circuit!.clients.first;
-       mapController?.animateCamera(CameraUpdate.newLatLngZoom(LatLng(client.latitude, client.longitude), 14.0));
-     }
+    if (circuit != null && circuit!.clients.isNotEmpty) {
+      final client = circuit!.clients.first;
+      mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(client.latitude!, client.longitude!  ),
+          14.0,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Afficher l'erreur si elle existe
-     if (_error != null) {
-       return Scaffold(
-         appBar: AppBar(
-           title: const Text('Circuit sur la carte'),
-           backgroundColor: Colors.indigo.shade600,
-         ),
-         body: Center(
-           child: Text('Erreur: $_error', style: const TextStyle(color: Colors.red)),
-         ),
-       );
-     }
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Circuit sur la carte'),
+          backgroundColor: Colors.indigo.shade600,
+        ),
+        body: Center(
+          child: Text('Erreur: $_error', style: const TextStyle(color: Colors.red)),
+        ),
+      );
+    }
 
-    // Si pas d'erreur mais pas de circuit non plus (devrait être géré par le bloc d'erreur ci-dessus, mais double vérification)
-     if (circuit == null || circuit!.clients.isEmpty) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Circuit sur la carte'),
-            backgroundColor: Colors.indigo.shade600,
-          ),
-          body: const Center(
-            child: Text('Aucune donnée de circuit disponible'),
-          ),
-        );
-     }
+    if (circuit == null || circuit!.clients.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Circuit sur la carte'),
+          backgroundColor: Colors.indigo.shade600,
+        ),
+        body: const Center(
+          child: Text('Aucune donnée de circuit disponible'),
+        ),
+      );
+    }
 
-    // Utiliser les coordonnées du premier client pour la position initiale si disponibles
-    final initialCameraPosition = (circuit!.clients.isNotEmpty)
-        ? CameraPosition(
-            target: LatLng(circuit!.clients.first.latitude, circuit!.clients.first.longitude),
-            zoom: 14.0,
-          )
-        : const CameraPosition(
-            target: LatLng(0, 0), // Default to origin if no client
-            zoom: 2.0,
-          );
+    final client = circuit!.clients.first;
+    final CameraPosition initialCameraPosition = CameraPosition(
+      target: LatLng(client.latitude!, client.longitude!),
+      zoom: 14.0,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -169,9 +162,9 @@ class _MapCircuitPageState extends State<MapCircuitPage> {
         onMapCreated: _onMapCreated,
         initialCameraPosition: initialCameraPosition,
         markers: markers,
-        myLocationEnabled: true, // Active le point bleu de la position de l'utilisateur
-        myLocationButtonEnabled: true, // Active le bouton de recentrage sur l'utilisateur
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
       ),
     );
   }
-} 
+}

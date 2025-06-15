@@ -1,11 +1,8 @@
-// 📁 lib/features/commande/pages/select_products_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pfe/core/utils/app_api.dart';
 import 'package:pfe/features/commande/controllers/produit_controller.dart';
-
-import '../../../data/models/produit_model.dart';
-
+import '../../models/produit_model.dart';
 
 class SelectProductsPage extends StatefulWidget {
   const SelectProductsPage({super.key});
@@ -112,8 +109,8 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
               final total = (p.prix * qte).toStringAsFixed(2);
               return ListTile(
                 title: Text(p.nom, style: TextStyle(color: colorScheme.onSurface)),
-                subtitle: Text("Quantité : \$qte  |  Prix unitaire : \${p.prix} €", style: TextStyle(color: colorScheme.onSurfaceVariant)),
-                trailing: Text("=\$total €", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+                subtitle: Text("Quantité : $qte  |  Prix unitaire : ${p.prix} €", style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                trailing: Text("= $total €", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
               );
             }).toList(),
           ),
@@ -165,25 +162,35 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
           return Center(child: CircularProgressIndicator(color: colorScheme.primary));
         }
 
-        final produits = produitController.produits.where((p) => selectedCategory == 'Tous' || p.categorie == selectedCategory).toList();
+        final produits = produitController.produits.where((p) {
+          final normalized = p.categorie.trim().toLowerCase();
+          return selectedCategory == 'Tous' || normalized == selectedCategory.toLowerCase();
+        }).toList();
+
+        final categories = [
+          'Tous',
+          ...produitController.produits
+              .map((p) => p.categorie.trim())
+              .toSet()
+              .toList()
+        ];
 
         return Column(
           children: [
             SizedBox(
               height: 70,
-              child: ListView(
+              child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                children: [
-                  'Tous',
-                  ...{...produitController.produits.map((p) => p.categorie)}
-                ].toSet().toList().map((cat) {
-                  final isSelected = cat == selectedCategory;
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final cat = categories[index];
+                  final isSelected = selectedCategory == cat;
                   return GestureDetector(
                     onTap: () => setState(() => selectedCategory = cat),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      width: 100,
+                      width: 120,
                       margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
                       decoration: BoxDecoration(
                         color: isSelected ? colorScheme.primary : colorScheme.surfaceContainerLow,
@@ -192,17 +199,23 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
                           color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
                           width: 1.5,
                         ),
-                        boxShadow: isSelected ? [BoxShadow(color: colorScheme.primary.withOpacity(0.3), blurRadius: 6, offset: Offset(0, 3))] : [],
+                        boxShadow: isSelected
+                            ? [BoxShadow(color: colorScheme.primary.withOpacity(0.3), blurRadius: 6, offset: Offset(0, 3))]
+                            : [],
                       ),
                       child: Center(
                         child: Text(
                           cat,
-                          style: TextStyle(color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
                         ),
                       ),
                     ),
                   );
-                }).toList(),
+                },
               ),
             ),
             Expanded(
@@ -232,7 +245,9 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
                             Expanded(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: Image.network("${AppApi.baseUrl}${p.images.first}", fit: BoxFit.cover,
+                                child: Image.network(
+                                  "${AppApi.baseUrl}${p.images.first}",
+                                  fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(Icons.image_not_supported, size: 80, color: colorScheme.onSurfaceVariant);
                                   },
@@ -267,16 +282,18 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
           ],
         );
       }),
-      floatingActionButton: cartItemCount > 0 ? FloatingActionButton.extended(
-        onPressed: () {
-          Get.toNamed('/select-client');
-        },
-        label: Text('Sélectionner Client', style: TextStyle(color: colorScheme.onPrimary)),
-        icon: Icon(Icons.arrow_forward, color: colorScheme.onPrimary),
-        backgroundColor: colorScheme.primary,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ) : null,
+      floatingActionButton: cartItemCount > 0
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                Get.toNamed('/select-client');
+              },
+              label: Text('Sélectionner Client', style: TextStyle(color: colorScheme.onPrimary)),
+              icon: Icon(Icons.arrow_forward, color: colorScheme.onPrimary),
+              backgroundColor: colorScheme.primary,
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            )
+          : null,
     );
   }
 }

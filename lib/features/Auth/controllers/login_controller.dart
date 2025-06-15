@@ -4,7 +4,6 @@ import 'package:pfe/core/utils/app_api.dart';
 import 'package:pfe/core/utils/app_services.dart';
 import 'package:pfe/core/utils/storage_services.dart';
 
-
 class LoginController extends GetxController {
   var email = ''.obs;
   var password = ''.obs;
@@ -29,27 +28,29 @@ class LoginController extends GetxController {
       print('API response received - Data: ${response.data}');
 
       if (response.statusCode == 201) {
-        print('API call successful, status 201.');
-        if (response.data is Map && response.data.containsKey('access_token')) {
-          final String? token = response.data['access_token'] as String?;
-          if (token != null && token.isNotEmpty) {
-            print('Access token found. Saving token.');
-            StorageService.saveToken(token);
-            print('Token saved. Navigating to home page.');
-            Get.offAllNamed(AppRoutes.homePage);
-          } else {
-            print('Error: Access token is null or empty in response data.');
-            Get.snackbar('Login Error', 'Invalid token received from server.');
-          }
+   
+        final String? token = response.data['access_token'] as String?;
+        final userData = response.data['user'];
+
+        if (token != null && token.isNotEmpty && userData != null) {
+          // Enregistrement du token
+          StorageService.saveToken(token);
+
+          // Enregistrement des données utilisateur
+          StorageService.saveUser(userData);
+
+          print('Token and user data saved. Navigating to home page.');
+          Get.offAllNamed(AppRoutes.bottomNavWrapper);
+
         } else {
-          print('Error: Response data is not a Map or does not contain access_token.');
-          Get.snackbar('Login Error', 'Invalid response format from server.');
+          Get.snackbar('Login Error', 'Missing token or user data.');
         }
       } else {
         print('API call failed with status: ${response.statusCode}');
-        final errorMessage = (response.data is Map && response.data.containsKey('message'))
-            ? response.data['message']
-            : 'Login failed';
+        final errorMessage =
+            (response.data is Map && response.data.containsKey('message'))
+                ? response.data['message']
+                : 'Login failed';
         Get.snackbar('Login Failed', errorMessage.toString());
       }
     } catch (e) {

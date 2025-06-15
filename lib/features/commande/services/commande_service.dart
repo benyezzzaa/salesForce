@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
-import '../../../data/models/commande_model.dart';
+import '../models/commande_model.dart';
 import '../../../core/utils/app_api.dart';
 
 class CommandeService {
@@ -37,25 +37,25 @@ class CommandeService {
     }
   }
 
-  Future<List<CommandeModel>> getAllCommandes() async {
-    final token = box.read('token');
+ Future<List<CommandeModel>> getAllCommandes() async {
+  final token = box.read('token');
 
-    try {
-      final response = await _dio.get(
-        '/commandes',
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
+  try {
+    final response = await _dio.get(
+      '/commandes/me', // <-- Modifier ici
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        return data.map((json) => CommandeModel.fromJson(json)).toList();
-      } else {
-        print("❌ Erreur de chargement : ${response.statusCode}");
-        return [];
-      }
-    } catch (e) {
-      print("❌ Erreur de récupération des commandes : $e");
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data;
+      return data.map((json) => CommandeModel.fromJson(json)).toList();
+    } else {
+      print("❌ Erreur de chargement : ${response.statusCode}");
       return [];
     }
+  } catch (e) {
+    print("❌ Erreur de récupération des commandes : $e");
+    return [];
   }
+}
 }

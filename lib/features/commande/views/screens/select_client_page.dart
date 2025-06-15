@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pfe/features/commande/controllers/client_controller.dart';
+import 'package:pfe/features/clients/controllers/client_controller.dart';
 import 'package:pfe/features/commande/controllers/commande_controller.dart';
-import '../../../data/models/client_model.dart';
 
 class SelectClientPage extends StatefulWidget {
   const SelectClientPage({super.key});
@@ -18,6 +17,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
   String searchQuery = '';
 
   final nameController = TextEditingController();
+  final prenomController = TextEditingController();
   final emailController = TextEditingController();
   final addressController = TextEditingController();
   final phoneController = TextEditingController();
@@ -26,7 +26,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
   void initState() {
     super.initState();
     if (clientController.clients.isEmpty) {
-      clientController.fetchClients();
+      clientController.fetchMesClients();
     }
   }
 
@@ -34,6 +34,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
   void dispose() {
     searchController.dispose();
     nameController.dispose();
+    prenomController.dispose();
     emailController.dispose();
     addressController.dispose();
     phoneController.dispose();
@@ -56,7 +57,18 @@ class _SelectClientPageState extends State<SelectClientPage> {
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
-                  labelText: "Nom complet",
+                  labelText: "Nom",
+                  labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+                ),
+                style: TextStyle(color: colorScheme.onSurface),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: prenomController,
+                decoration: InputDecoration(
+                  labelText: "Prénom",
                   labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                   enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
                   focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
@@ -108,7 +120,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
           ),
           ElevatedButton(
             onPressed: () async {
-              if (nameController.text.isNotEmpty && emailController.text.isNotEmpty) {
+              if (nameController.text.isNotEmpty && prenomController.text.isNotEmpty) {
                 Get.dialog(
                   const Center(child: CircularProgressIndicator()),
                   barrierDismissible: false,
@@ -116,6 +128,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
 
                 final newClient = await clientController.addClient(
                   nom: nameController.text,
+                  prenom: prenomController.text,
                   email: emailController.text,
                   adresse: addressController.text,
                   telephone: phoneController.text,
@@ -124,6 +137,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
                 Get.back();
 
                 nameController.clear();
+                prenomController.clear();
                 emailController.clear();
                 addressController.clear();
                 phoneController.clear();

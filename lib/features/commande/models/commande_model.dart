@@ -7,6 +7,7 @@ class CommandeModel {
   final String statut;
   final String clientNom;
   final String? clientAdresse;
+  final String? clientEmail;
   final List<LigneCommande> lignes;
 
   CommandeModel({
@@ -15,6 +16,7 @@ class CommandeModel {
     required this.dateCreation,
     required this.prixTotalTTC,
     required this.prixHorsTaxe,
+    this.clientEmail,
     required this.statut,
     required this.clientNom,
     required this.lignes,
@@ -26,6 +28,7 @@ class CommandeModel {
       id: json['id'],
       numeroCommande: json['numero_commande'],
       dateCreation: json['date_creation'],
+      clientEmail: json['client']['email'], 
       prixTotalTTC: double.tryParse(json['prix_total_ttc'].toString()) ?? 0,
       prixHorsTaxe: double.tryParse(json['prix_hors_taxe'].toString()) ?? 0,
       statut: json['statut'] ?? 'en_attente',
