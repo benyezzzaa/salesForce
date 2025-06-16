@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pfe/features/clients/controllers/client_controller.dart';
+import 'package:pfe/features/clients/views/add_client_page.dart';
 import 'package:pfe/features/commande/controllers/commande_controller.dart';
 
 class SelectClientPage extends StatefulWidget {
@@ -22,6 +24,10 @@ class _SelectClientPageState extends State<SelectClientPage> {
   final addressController = TextEditingController();
   final phoneController = TextEditingController();
 
+  GoogleMapController? mapController;
+  LatLng? selectedLocation;
+  Set<Marker> markers = {};
+
   @override
   void initState() {
     super.initState();
@@ -38,147 +44,184 @@ class _SelectClientPageState extends State<SelectClientPage> {
     emailController.dispose();
     addressController.dispose();
     phoneController.dispose();
+    mapController?.dispose();
     super.dispose();
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
+  void _onMapTap(LatLng location) {
+    setState(() {
+      selectedLocation = location;
+      markers = {
+        Marker(
+          markerId: const MarkerId('selectedLocation'),
+          position: location,
+          infoWindow: const InfoWindow(title: 'Position sélectionnée'),
+        ),
+      };
+    });
   }
 
   void _showAddClientDialog(BuildContext context, Map<int, int> cart) {
     final colorScheme = Theme.of(context).colorScheme;
-
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: colorScheme.surface,
-        title: Text("Ajouter un client", style: TextStyle(color: colorScheme.onSurface)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: "Nom",
-                  labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text("Ajouter un nouveau client", style: TextStyle(color: colorScheme.onSurface)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: "Nom",
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+                  ),
+                  style: TextStyle(color: colorScheme.onSurface),
                 ),
-                style: TextStyle(color: colorScheme.onSurface),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: prenomController,
-                decoration: InputDecoration(
-                  labelText: "Prénom",
-                  labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: prenomController,
+                  decoration: InputDecoration(
+                    labelText: "Prénom",
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+                  ),
+                  style: TextStyle(color: colorScheme.onSurface),
                 ),
-                style: TextStyle(color: colorScheme.onSurface),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: "Email",
-                  labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: "Email",
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+                  ),
+                  style: TextStyle(color: colorScheme.onSurface),
                 ),
-                style: TextStyle(color: colorScheme.onSurface),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: addressController,
-                decoration: InputDecoration(
-                  labelText: "Adresse",
-                  labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: addressController,
+                  decoration: InputDecoration(
+                    labelText: "Adresse",
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+                  ),
+                  style: TextStyle(color: colorScheme.onSurface),
                 ),
-                style: TextStyle(color: colorScheme.onSurface),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  labelText: "Téléphone",
-                  labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: "Téléphone",
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+                  ),
+                  style: TextStyle(color: colorScheme.onSurface),
                 ),
-                style: TextStyle(color: colorScheme.onSurface),
-              ),
-            ],
+                const SizedBox(height: 16),
+                const Text(
+                  'Sélectionnez la position sur la carte *',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: GoogleMap(
+                      onMapCreated: _onMapCreated,
+                      onTap: _onMapTap,
+                      initialCameraPosition: const CameraPosition(
+                        target: LatLng(36.8065, 10.1815), // Tunis
+                        zoom: 12,
+                      ),
+                      markers: markers,
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
+                      zoomControlsEnabled: true,
+                    ),
+                  ),
+                ),
+                if (selectedLocation != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Position sélectionnée: ${selectedLocation!.latitude.toStringAsFixed(4)}, ${selectedLocation!.longitude.toStringAsFixed(4)}',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Annuler", style: TextStyle(color: colorScheme.primary)),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (nameController.text.isNotEmpty && prenomController.text.isNotEmpty) {
-                Get.dialog(
-                  const Center(child: CircularProgressIndicator()),
-                  barrierDismissible: false,
-                );
-
-                final newClient = await clientController.addClient(
-                  nom: nameController.text,
-                  prenom: prenomController.text,
-                  email: emailController.text,
-                  adresse: addressController.text,
-                  telephone: phoneController.text,
-                );
-
-                Get.back();
-
-                nameController.clear();
-                prenomController.clear();
-                emailController.clear();
-                addressController.clear();
-                phoneController.clear();
-
-                if (newClient != null) {
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Annuler", style: TextStyle(color: colorScheme.primary)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (nameController.text.isNotEmpty && prenomController.text.isNotEmpty && selectedLocation != null) {
                   Get.dialog(
                     const Center(child: CircularProgressIndicator()),
                     barrierDismissible: false,
                   );
 
-                  await commandeController.createCommande(newClient.id, cart);
+                  final newClient = await clientController.addClient(
+                    nom: nameController.text,
+                    prenom: prenomController.text,
+                    email: emailController.text,
+                    adresse: addressController.text,
+                    telephone: phoneController.text,
+                    latitude: selectedLocation!.latitude,
+                    longitude: selectedLocation!.longitude,
+                  );
 
                   Get.back();
 
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      backgroundColor: colorScheme.surface,
-                      title: Text("Commande créée ✅", style: TextStyle(color: colorScheme.onSurface)),
-                      content: Text("La commande a été ajoutée avec succès en attente.", style: TextStyle(color: colorScheme.onSurfaceVariant)),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Get.until((route) => Get.currentRoute == '/commandes'),
-                          child: Text("Voir mes commandes", style: TextStyle(color: colorScheme.primary)),
-                        ),
-                      ],
-                    ),
+                  if (newClient != null) {
+                    nameController.clear();
+                    prenomController.clear();
+                    emailController.clear();
+                    addressController.clear();
+                    phoneController.clear();
+                    setState(() {
+                      selectedLocation = null;
+                      markers = {};
+                    });
+
+                    Navigator.pop(context);
+                    commandeController.setSelectedClient(newClient);
+                    Get.back(result: true);
+                  }
+                } else {
+                  Get.snackbar(
+                    'Erreur',
+                    'Veuillez remplir tous les champs obligatoires et sélectionner une position',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
                   );
                 }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.primary,
-              foregroundColor: colorScheme.onPrimary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              elevation: 4,
+              },
+              child: Text("Ajouter", style: TextStyle(color: colorScheme.onPrimary)),
             ),
-            child: Text("Ajouter", style: TextStyle(fontSize: 16)),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -186,36 +229,10 @@ class _SelectClientPageState extends State<SelectClientPage> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final arguments = Get.arguments as Map<String, dynamic>? ?? {};
-    final cart = arguments['cart'] as Map<int, int>? ?? {};
-
-    if (cart.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.snackbar(
-          'Panier vide',
-          'Veuillez ajouter des produits avant de sélectionner un client.',
-          backgroundColor: colorScheme.error,
-          colorText: colorScheme.onError,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        Get.back();
-      });
-    }
-
     return Scaffold(
-      backgroundColor: colorScheme.background,
       appBar: AppBar(
-        title: Text("Sélectionner un client", style: TextStyle(color: colorScheme.onPrimary)),
+        title: const Text("Sélectionner un client"),
         backgroundColor: colorScheme.primary,
-        iconTheme: IconThemeData(color: colorScheme.onPrimary),
-        elevation: 2,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.person_add, color: colorScheme.onPrimary),
-            tooltip: 'Ajouter un client',
-            onPressed: () => _showAddClientDialog(context, cart),
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -223,97 +240,72 @@ class _SelectClientPageState extends State<SelectClientPage> {
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: searchController,
-              onChanged: (val) => setState(() => searchQuery = val),
               decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
-                hintText: "Rechercher un client...",
-                hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: colorScheme.surfaceContainerLow,
-                contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
+                labelText: "Rechercher un client",
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              style: TextStyle(color: colorScheme.onSurface),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+              },
             ),
           ),
           Expanded(
             child: Obx(() {
               if (clientController.isLoading.value) {
-                return Center(child: CircularProgressIndicator(color: colorScheme.primary));
+                return const Center(child: CircularProgressIndicator());
               }
 
-              final filteredClients = clientController.clients
-                  .where((c) => c.nom.toLowerCase().contains(searchQuery.toLowerCase()))
-                  .toList();
+              final filteredClients = clientController.clients.where((client) {
+                final fullName = "${client.prenom} ${client.nom}".toLowerCase();
+                final searchLower = searchQuery.toLowerCase();
+                return fullName.contains(searchLower);
+              }).toList();
 
               if (filteredClients.isEmpty) {
-                if (searchQuery.isNotEmpty) {
-                  return Center(child: Text("Aucun client trouvé pour cette recherche.", style: TextStyle(color: colorScheme.onSurfaceVariant)));
-                } else {
-                  return Center(child: Text("Aucun client disponible.", style: TextStyle(color: colorScheme.onSurfaceVariant)));
-                }
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Aucun client trouvé"),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => _showAddClientDialog(context, {}),
+                        child: const Text("Ajouter un nouveau client"),
+                      ),
+                    ],
+                  ),
+                );
               }
 
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 itemCount: filteredClients.length,
                 itemBuilder: (context, index) {
                   final client = filteredClients[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    color: colorScheme.surface,
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: colorScheme.primaryContainer,
-                        child: Icon(Icons.person, color: colorScheme.onPrimaryContainer),
-                      ),
-                      title: Text(client.nom, style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(client.email, style: TextStyle(color: colorScheme.onSurfaceVariant)),
-                          Text(client.adresse ?? 'Adresse inconnue', style: TextStyle(color: colorScheme.onSurfaceVariant)),
-                        ],
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios, size: 18, color: colorScheme.onSurfaceVariant),
-                      onTap: () async {
-                        Get.dialog(
-                          const Center(child: CircularProgressIndicator()),
-                          barrierDismissible: false,
-                        );
-
-                        await commandeController.createCommande(client.id, cart);
-
-                        Get.back();
-
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            backgroundColor: colorScheme.surface,
-                            title: Text("Commande créée ✅", style: TextStyle(color: colorScheme.onSurface)),
-                            content: Text("La commande a été ajoutée avec succès en attente.", style: TextStyle(color: colorScheme.onSurfaceVariant)),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Get.until((route) => Get.currentRoute == '/commandes'),
-                                child: Text("Voir mes commandes", style: TextStyle(color: colorScheme.primary)),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                  return ListTile(
+                    title: Text("${client.prenom} ${client.nom}"),
+                    subtitle: Text(client.email),
+                    onTap: () {
+                      commandeController.setSelectedClient(client);
+                      Get.back(result: true);
+                    },
                   );
                 },
               );
             }),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: (){ Get.to(() => const AddClientPage())?.then((added) {
+      if (added == true) {
+        clientController.fetchMesClients();
+      }
+    });},
+        //  => _showAddClientDialog(context, {}),
+        child: const Icon(Icons.add),
       ),
     );
   }

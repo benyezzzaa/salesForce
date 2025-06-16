@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pfe/features/clients/controllers/client_controller.dart';
 import 'package:pfe/features/clients/views/ClientsMapPage.dart';
+import 'package:pfe/features/clients/views/add_client_page.dart';
 
 class ClientsPage extends StatefulWidget {
   const ClientsPage({super.key});
@@ -35,98 +36,12 @@ final adresseController = TextEditingController();
     super.dispose();
   }
  void _openAddClientForm() {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (_) => Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        top: 20,
-        left: 20,
-        right: 20,
-      ),
-      child: Form(
-        key: _formKey,
-        child: Wrap(
-          runSpacing: 16,
-          children: [
-            Text("🧾 Ajouter un Client", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            TextFormField(
-              controller: nomController,
-              decoration: const InputDecoration(labelText: 'Nom *'),
-              validator: (value) => value == null || value.isEmpty ? 'Champ requis' : null,
-            ),
-            TextFormField(
-              controller: prenomController,
-              decoration: const InputDecoration(labelText: 'Prénom *'),
-              validator: (value) => value == null || value.isEmpty ? 'Champ requis' : null,
-            ),
-            TextFormField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            TextFormField(
-              controller: telephoneController,
-              decoration: const InputDecoration(labelText: 'Téléphone'),
-            ),
-            TextFormField(
-              controller: adresseController,
-              decoration: const InputDecoration(labelText: 'Adresse'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  final success = await clientController.addClient(
-                    nom: nomController.text,
-                    prenom: prenomController.text,
-                    email: emailController.text,
-                    telephone: telephoneController.text,
-                    adresse: adresseController.text,
-                  );
-
-                  if (success != null) {
-                    nomController.clear();
-                    prenomController.clear();
-                    emailController.clear();
-                    telephoneController.clear();
-                    adresseController.clear();
-
-                    Get.back(); // Fermer le BottomSheet
-
-                    // Afficher la boîte de dialogue
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        final colorScheme = Theme.of(context).colorScheme;
-                        return AlertDialog(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          backgroundColor: colorScheme.surface,
-                          title: Text("✅ Client ajouté", style: TextStyle(color: colorScheme.onSurface)),
-                          content: Text("Le client a été ajouté avec succès.", style: TextStyle(color: colorScheme.onSurfaceVariant)),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Get.back(),
-                              child: Text("Fermer", style: TextStyle(color: colorScheme.primary)),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  }
-                }
-              },
-              child: const Text("✅ Ajouter le client"),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    ),
-  );
-}
+    Get.to(() => const AddClientPage())?.then((added) {
+      if (added == true) {
+        clientController.fetchMesClients();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

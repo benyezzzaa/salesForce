@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pfe/features/reclamation/controller/reclamation_controller.dart';
+import 'package:pfe/features/reclamation/Controller/reclamation_controller.dart';
 
 
 class ReclamationFormPage extends StatelessWidget {

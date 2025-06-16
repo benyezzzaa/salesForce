@@ -19,10 +19,40 @@ class ClientController extends GetxController {
     try {
       isLoading.value = true;
       final response = await _api.get("${AppApi.getClientsUrl}/mes-clients");
+      
+      // Log plus visible des données
+      print("\n\n=== DONNÉES CLIENTS ===");
+      print("Nombre total de clients: ${(response.data as List).length}");
+      
       clients.value = (response.data as List)
           .map((e) => ClientModel.fromJson(e))
           .toList();
+      
+      // Log des clients avec leurs coordonnées
+      print("\n=== COORDONNÉES CLIENTS ===");
+      for (var client in clients) {
+        print("Client: ${client.fullName}");
+        print("  - Latitude: ${client.latitude}");
+        print("  - Longitude: ${client.longitude}");
+        print("  - Adresse: ${client.adresse}");
+        print("-------------------");
+      }
+      
+      // Compte des clients avec coordonnées
+      final clientsWithCoords = clients.where((c) => 
+        c.latitude != null && c.longitude != null
+      ).length;
+      
+      print("\n=== RÉSUMÉ ===");
+      print("Total clients: ${clients.length}");
+      print("Clients avec coordonnées: $clientsWithCoords");
+      print("Clients sans coordonnées: ${clients.length - clientsWithCoords}");
+      print("===================\n\n");
+      
     } catch (e) {
+      print("\n=== ERREUR ===");
+      print("Erreur lors du chargement des clients: $e");
+      print("===================\n\n");
       Get.snackbar("Erreur", "Impossible de charger vos clients");
     } finally {
       isLoading.value = false;
@@ -54,36 +84,33 @@ class ClientController extends GetxController {
   }
 
   /// ➕ Ajouter un client
- Future<ClientModel?> addClient({
-  required String nom,
-  required String prenom,
-  required String email,
-  required String adresse,
-  required String telephone,
-}) async {
-  try {
-    // ✅ Obtenir la position GPS actuelle
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+  Future<ClientModel?> addClient({
+    required String nom,
+    required String prenom,
+    required String email,
+    required String adresse,
+    required String telephone,
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      final response = await _api.post(AppApi.getClientsUrl, {
+        'nom': nom,
+        'prenom': prenom,
+        'email': email,
+        'adresse': adresse,
+        'telephone': telephone,
+        'latitude': latitude,
+        'longitude': longitude,
+        'estFidele': true,
+      });
 
-    final response = await _api.post(AppApi.getClientsUrl, {
-      'nom': nom,
-      'prenom': prenom,
-      'email': email,
-      'adresse': adresse,
-      'telephone': telephone,
-      'latitude': position.latitude,
-      'longitude': position.longitude,
-      'estFidele': true, // ou false selon ta logique
-    });
-
-    final client = ClientModel.fromJson(response.data);
-    clients.add(client);
-    return client;
-  } catch (e) {
-    Get.snackbar('Erreur', 'Impossible d\'ajouter le client');
-    return null;
+      final client = ClientModel.fromJson(response.data);
+      clients.add(client);
+      return client;
+    } catch (e) {
+      Get.snackbar('Erreur', 'Impossible d\'ajouter le client');
+      return null;
+    }
   }
-}
 }

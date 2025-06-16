@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:pfe/core/utils/app_api.dart';
 import 'package:pfe/features/commande/controllers/produit_controller.dart';
 import '../../models/produit_model.dart';
+import 'package:pfe/features/commande/controllers/commande_controller.dart';
 
 class SelectProductsPage extends StatefulWidget {
   const SelectProductsPage({super.key});
@@ -284,8 +285,22 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
       }),
       floatingActionButton: cartItemCount > 0
           ? FloatingActionButton.extended(
-              onPressed: () {
-                Get.toNamed('/select-client');
+              onPressed: () async {
+                final result = await Get.toNamed('/select-client');
+                if (result == true) {
+                  final commandeController = Get.find<CommandeController>();
+                  final selectedClient = commandeController.selectedClient.value;
+                  if (selectedClient != null) {
+                    await commandeController.createCommande(selectedClient.id, cart);
+                    Get.snackbar(
+                      'Succès',
+                      'Commande créée avec succès',
+                      backgroundColor: Colors.green,
+                      colorText: Colors.white,
+                    );
+                    Get.offAllNamed('/commercial-orders');
+                  }
+                }
               },
               label: Text('Sélectionner Client', style: TextStyle(color: colorScheme.onPrimary)),
               icon: Icon(Icons.arrow_forward, color: colorScheme.onPrimary),

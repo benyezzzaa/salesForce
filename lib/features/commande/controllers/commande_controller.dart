@@ -1,11 +1,13 @@
 import 'package:get/get.dart';
 import '../models/commande_model.dart';
 import '../services/commande_service.dart';
+import 'package:pfe/features/visite/models/client_model.dart';
 
 class CommandeController extends GetxController {
   final commandes = <CommandeModel>[].obs;
   final isLoading = false.obs;
   final _service = CommandeService();
+  final selectedClient = Rxn<ClientModel>();
 
   @override
   void onInit() {
@@ -48,5 +50,9 @@ class CommandeController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void setSelectedClient(ClientModel client) {
+    selectedClient.value = client;
   }
 }

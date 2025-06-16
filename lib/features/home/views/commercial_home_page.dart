@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:pfe/core/routes/app_routes.dart';
 import 'package:pfe/features/home/controller/commercial_controller.dart';
+import 'package:pfe/features/notifications/controllers/notification_controller.dart';
 import 'package:pfe/features/profile/controllers/profile_controller.dart';
+import 'package:pfe/features/reclamation/Controller/reclamation_controller.dart';
 
 class CommercialHomePage extends StatelessWidget {
   const CommercialHomePage({super.key});
@@ -13,6 +15,8 @@ class CommercialHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(CommercialController());
     final profileController = Get.put(ProfileController());
+     final NotificationController notifController = Get.put(NotificationController());
+     final ReclamationController reclamationController = Get.put(ReclamationController());
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF4F6F9);
     final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
@@ -25,20 +29,21 @@ class CommercialHomePage extends StatelessWidget {
         title: const Text('Tableau de Bord', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
         actions: [
           Obx(() {
-            final notifCount = controller.notificationsCount.value;
+          
 
-            return Stack(
+            return GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/notifications');
+              },
+              child: 
+            
+             Stack(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.notifications_none_rounded, size: 28),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/notifications');
-                  },
-                ),
-                if (notifCount > 0)
+               Icon(Icons.notifications_none_rounded, size: 40, color: Colors.white,),
+                if ( notifController.promotions.length > 0)
                   Positioned(
-                    right: 8,
-                    top: 8,
+                    right: 13,
+                    bottom: 23,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
@@ -46,13 +51,13 @@ class CommercialHomePage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        notifCount.toString(),
+                        notifController.promotions.length.toString(),
                         style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
               ],
-            );
+            ));
           }),
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -82,7 +87,7 @@ class CommercialHomePage extends StatelessWidget {
                   const SizedBox(height: 8),
                   _infoCard(Icons.location_on, "Vous êtes à Paris 15e"),
                   const SizedBox(height: 12),
-                  _infoCard(Icons.campaign_outlined, "📢 ${controller.reclamationsCount} réclamations en attente\n🎯 Objectif : ${(percent * 100).toStringAsFixed(0)}% atteint !"),
+                  _infoCard(Icons.campaign_outlined, "📢 ${reclamationController.mesReclamations.length} réclamations en attente\n🎯 Objectif : ${(percent * 100).toStringAsFixed(0)}% atteint !"),
                   const SizedBox(height: 24),
                   _sectionTitle("Vos Objectifs"),
                   _objectifOverview(controller),

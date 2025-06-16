@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import '../../models/commande_model.dart';
@@ -20,7 +19,7 @@ class CommandeDetailsPage extends StatelessWidget {
       backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF1F5F9),
       appBar: AppBar(
         backgroundColor: Colors.indigo.shade500,
-        title: Text('Commande #${commande.numeroCommande}', style: const TextStyle(color: Colors.white)),
+        title: Text('Commande ${commande.numeroCommande}', style: const TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       floatingActionButton: FloatingActionButton.extended(
