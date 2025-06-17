@@ -40,7 +40,9 @@ class LoginController extends GetxController {
           StorageService.saveUser(userData);
 
           print('Token and user data saved. Navigating to home page.');
+          Future.delayed(Duration.zero, () {
           Get.offAllNamed(AppRoutes.bottomNavWrapper);
+});
 
         } else {
           Get.snackbar('Login Error', 'Missing token or user data.');

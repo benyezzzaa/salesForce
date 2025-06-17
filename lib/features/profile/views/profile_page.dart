@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart'; // <-- important
+import 'package:pfe/core/routes/app_routes.dart';
 import 'package:pfe/features/profile/controllers/profile_controller.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -7,20 +9,25 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF4F6F9);
+    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+
     return Scaffold(
-      appBar: 
-      AppBar(
+      backgroundColor: bgColor,
+      appBar: AppBar(
         backgroundColor: Colors.indigo.shade600,
         elevation: 0,
-      leading: SizedBox(),
-      title:Text("Mon Profil", style: TextStyle(color: Colors.white),),
+        leading: const SizedBox(),
+        title: const Text("Mon Profil", style: TextStyle(color: Colors.white)),
       ),
       body: Obx(() => SingleChildScrollView(
-            padding: const EdgeInsets.all(16),  
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 // Avatar + nom complet
                 Card(
+                  color: cardColor,
                   elevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -31,7 +38,7 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         const CircleAvatar(
                           radius: 40,
-                          backgroundColor: Colors.teal,
+                          backgroundColor: Colors.indigo,
                           child: Icon(Icons.person, size: 50, color: Colors.white),
                         ),
                         const SizedBox(height: 10),
@@ -54,13 +61,15 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Infos
-                InfoTile(icon: Icons.email, label: 'Email', value: controller.email.value),
-                InfoTile(icon: Icons.phone, label: 'Téléphone', value: controller.tel.value),
+
+                // Infos personnelles
+                InfoTile(icon: Icons.email, label: 'Email', value: controller.email.value, color: cardColor),
+                InfoTile(icon: Icons.phone, label: 'Téléphone', value: controller.tel.value, color: cardColor),
                 const SizedBox(height: 30),
+
+                // Bouton de déconnexion
                 ElevatedButton.icon(
                   onPressed: () {
-                    // Action de déconnexion (optionnel)
                     Get.defaultDialog(
                       title: "Déconnexion",
                       middleText: "Voulez-vous vraiment vous déconnecter ?",
@@ -68,8 +77,9 @@ class ProfilePage extends StatelessWidget {
                       textConfirm: "Oui",
                       confirmTextColor: Colors.white,
                       onConfirm: () {
-                        Get.reset(); // ou StorageService.clear()
-                        Get.offAllNamed('/login');
+                         GetStorage().erase();                      // 🧹 Nettoyer la session
+                        Get.offAllNamed(AppRoutes.loginPage);     // ✅ Rediriger d’abord
+                        Get.reset(); // 🔁 Redirige vers login
                       },
                     );
                   },
@@ -77,7 +87,9 @@ class ProfilePage extends StatelessWidget {
                   label: const Text("Déconnexion"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.redAccent,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
               ],
@@ -91,21 +103,24 @@ class InfoTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final Color color;
 
   const InfoTile({
     required this.icon,
     required this.label,
     required this.value,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: color,
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
-        leading: Icon(icon, color: Colors.teal[700]),
+        leading: Icon(icon, color: Colors.indigo),
         title: Text(label),
         subtitle: Text(value),
       ),

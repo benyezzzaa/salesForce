@@ -15,8 +15,8 @@ class CommercialHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(CommercialController());
     final profileController = Get.put(ProfileController());
-     final NotificationController notifController = Get.put(NotificationController());
-     final ReclamationController reclamationController = Get.put(ReclamationController());
+    final NotificationController notifController = Get.put(NotificationController());
+    final ReclamationController reclamationController = Get.put(ReclamationController());
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF4F6F9);
     final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
@@ -26,41 +26,38 @@ class CommercialHomePage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.indigo.shade600,
         elevation: 0,
-        title: const Text('Tableau de Bord', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+        title: const Text('Digital Process ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
         actions: [
           Obx(() {
-          
-
             return GestureDetector(
               onTap: () {
                 Navigator.pushNamed(context, '/notifications');
               },
-              child: 
-            
-             Stack(
-              children: [
-               Icon(Icons.notifications_none_rounded, size: 40, color: Colors.white,),
-                if ( notifController.promotions.length > 0)
-                  Positioned(
-                    right: 13,
-                    bottom: 23,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        notifController.promotions.length.toString(),
-                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+              child: Stack(
+                children: [
+                  Icon(Icons.notifications_none_rounded, size: 40, color: Colors.white),
+                  if (notifController.promotions.length > 0)
+                    Positioned(
+                      right: 13,
+                      bottom: 23,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          notifController.promotions.length.toString(),
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
-                  ),
-              ],
-            ));
+                ],
+              ),
+            );
           }),
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
+          const Padding(
+            padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(child: Icon(Icons.person)),
           ),
         ],
@@ -82,13 +79,11 @@ class CommercialHomePage extends StatelessWidget {
                     "👋 Bonjour ${profileController.prenom.value} ${profileController.nom.value}",
                     style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.indigo),
                   ),
-                 
                   const SizedBox(height: 24),
                   _sectionTitle("Vos Objectifs"),
                   _objectifOverview(controller),
                   const SizedBox(height: 12),
-            
-                  _infoCard(Icons.emoji_objects, "📢 ${reclamationController.mesReclamations.length} réclamations en attente🎯"),
+                  _infoCard(Icons.emoji_objects, "📢 ${reclamationController.mesReclamations.length} réclamations en attente 🎯"),
                   const SizedBox(height: 12),
                   _sectionTitle("Navigation rapide"),
                   const SizedBox(height: 12),
@@ -146,79 +141,69 @@ class CommercialHomePage extends StatelessWidget {
       );
     }
 
-    return Column(
-      children: objectifs.map((obj) {
-        final double objectifValue = obj.objectif;
-        final double realiseValue = obj.realise;
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: objectifs.map((obj) {
+            final double objectifValue = obj.objectif;
+            final double realiseValue = obj.realise;
 
-        double percentage = 0.0;
-        if (objectifValue > 0) {
-          percentage = (realiseValue / objectifValue).clamp(0.0, 1.0);
-        }
+            double percentage = 0.0;
+            if (objectifValue > 0) {
+              percentage = (realiseValue / objectifValue).clamp(0.0, 1.0);
+            }
 
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          color: colorScheme.surface,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  obj.categorie.trim(),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                LinearProgressIndicator(
-                  value: percentage,
-                  backgroundColor: colorScheme.surfaceContainerHighest,
-                  color: colorScheme.primary,
-                  minHeight: 12,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Réalisé : ${realiseValue.toStringAsFixed(1)}",
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    Text(
-                      "Objectif : ${objectifValue.toStringAsFixed(1)}",
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    "${(percentage * 100).toStringAsFixed(1)}% atteint",
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    obj.categorie.trim(),
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(
+                    value: percentage,
+                    backgroundColor: colorScheme.surfaceContainerHighest,
+                    color: colorScheme.primary,
+                    minHeight: 12,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Réalisé : ${realiseValue.toStringAsFixed(1)}",
+                        style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+                      ),
+                      Text(
+                        "Objectif : ${objectifValue.toStringAsFixed(1)}",
+                        style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+                      ),
+                      Text(
+                        "${(percentage * 100).toStringAsFixed(1)}%",
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: colorScheme.primary),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 
