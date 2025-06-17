@@ -42,6 +42,60 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
     super.dispose();
   }
 
+  Color _getStatusColor(String status, ColorScheme colorScheme) {
+    switch (status.toLowerCase()) {
+      case 'en_attente':
+        return colorScheme.secondaryContainer;
+      case 'validee':
+        return colorScheme.primaryContainer;
+      case 'livree':
+        return colorScheme.tertiaryContainer;
+      case 'annulee':
+        return colorScheme.errorContainer;
+      default:
+        return colorScheme.surfaceVariant;
+    }
+  }
+
+  Color _getStatusTextColor(String status, ColorScheme colorScheme) {
+    switch (status.toLowerCase()) {
+      case 'en_attente':
+        return colorScheme.onSecondaryContainer;
+      case 'validee':
+        return colorScheme.onPrimaryContainer;
+      case 'livree':
+        return colorScheme.onTertiaryContainer;
+      case 'annulee':
+        return colorScheme.onErrorContainer;
+      default:
+        return colorScheme.onSurfaceVariant;
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status.toLowerCase()) {
+      case 'en_attente':
+        return 'En attente';
+      case 'validee':
+        return 'Validée';
+      case 'livree':
+        return 'Livrée';
+      case 'annulee':
+        return 'Annulée';
+      default:
+        return status;
+    }
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    } catch (e) {
+      return dateString;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -78,7 +132,9 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
                   icon: Icon(Icons.add_circle_outline,
                       size: 28, color: colorScheme.onPrimary),
                   tooltip: 'Nouvelle commande',
-                  onPressed: () => Get.toNamed('/select-products'),
+                  onPressed: () {
+                    Get.toNamed('/select-products');
+                  },
                 )
               ],
               iconTheme: IconThemeData(color: colorScheme.onPrimary),
@@ -114,7 +170,6 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
 
                 var filtered = controller.commandes
                     .where((c) =>
-                        c.statut.toLowerCase() != 'validée' &&
                         (c.numeroCommande
                                 .toLowerCase()
                                 .contains(searchQuery.toLowerCase()) ||
@@ -133,85 +188,193 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
 
                 if (filtered.isEmpty) {
                   return Center(
-                    child: Text("Aucune commande trouvée",
-                        style:
-                            TextStyle(color: colorScheme.onSurfaceVariant)),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.shopping_cart_outlined,
+                          size: 64,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          searchQuery.isEmpty 
+                              ? "Aucune commande trouvée"
+                              : "Aucune commande correspondant à '$searchQuery'",
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 16,
+                          ),
+                        ),
+                        if (searchQuery.isEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            "Créez votre première commande !",
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   );
                 }
 
                 return FadeTransition(
                   opacity: _fadeAnimation,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final cmd = filtered[index];
-                      final isValid = cmd.statut == 'validée';
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await controller.fetchCommandes();
+                    },
+                    color: colorScheme.primary,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final cmd = filtered[index];
 
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 6),
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        color: colorScheme.surface,
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(16),
-                          title: Text(
-                            " ${cmd.numeroCommande}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: colorScheme.onSurface),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Text("Client : ${cmd.clientNom}",
-                                  style: TextStyle(
-                                      color: colorScheme.onSurfaceVariant)),
-                              Text("Date : ${cmd.dateCreation}",
-                                  style: TextStyle(
-                                      color: colorScheme.onSurfaceVariant)),
-                            ],
-                          ),
-                          trailing: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.secondaryContainer,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  'En attente',
-                                  style: TextStyle(
-                                    color: colorScheme.onSecondaryContainer,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          color: colorScheme.surface,
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(16),
+                            title: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    cmd.numeroCommande,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: colorScheme.onSurface),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text("${cmd.prixTotalTTC.toStringAsFixed(2)} DT",
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: _getStatusColor(cmd.statut, colorScheme),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    _getStatusText(cmd.statut),
+                                    style: TextStyle(
+                                      color: _getStatusTextColor(cmd.statut, colorScheme),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.person_outline,
+                                      size: 16,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        cmd.clientNom,
+                                        style: TextStyle(
+                                            color: colorScheme.onSurfaceVariant),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_today_outlined,
+                                      size: 16,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      _formatDate(cmd.dateCreation),
+                                      style: TextStyle(
+                                          color: colorScheme.onSurfaceVariant),
+                                    ),
+                                  ],
+                                ),
+                                if (cmd.clientTelephone != null) ...[
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.phone_outlined,
+                                        size: 16,
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        cmd.clientTelephone!,
+                                        style: TextStyle(
+                                            color: colorScheme.onSurfaceVariant),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.shopping_bag_outlined,
+                                      size: 16,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "${cmd.lignes.length} produit${cmd.lignes.length > 1 ? 's' : ''}",
+                                      style: TextStyle(
+                                          color: colorScheme.onSurfaceVariant),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            trailing: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "${cmd.prixTotalTTC.toStringAsFixed(2)} DT",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: colorScheme.primary)),
-                            ],
-                          ),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  CommandeDetailsPage(commande: cmd),
+                                      fontSize: 16,
+                                      color: colorScheme.primary),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "HT: ${cmd.prixHorsTaxe.toStringAsFixed(2)} DT",
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: colorScheme.onSurfaceVariant),
+                                ),
+                              ],
+                            ),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    CommandeDetailsPage(commande: cmd),
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 );
               }),

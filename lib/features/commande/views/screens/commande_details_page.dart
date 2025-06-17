@@ -62,15 +62,34 @@ class CommandeDetailsPage extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(ligne.produitNom, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                              if (ligne.produitDescription.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  ligne.produitDescription,
+                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                              const SizedBox(height: 4),
+                              Text("Quantité : ${ligne.quantite}", style: const TextStyle(fontSize: 14)),
+                              Text("Prix unitaire : ${ligne.prixUnitaire.toStringAsFixed(2)} DT", style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                            ],
+                          ),
+                        ),
                         Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(ligne.produit, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                            Text("${ligne.total.toStringAsFixed(2)} DT", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                             const SizedBox(height: 4),
-                            Text("Quantité : ${ligne.quantite}", style: const TextStyle(fontSize: 14)),
+                            Text("Total", style: const TextStyle(fontSize: 12, color: Colors.grey)),
                           ],
                         ),
-                        Text("${ligne.prix.toStringAsFixed(2)} DT", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500))
                       ],
                     ),
                   );
@@ -140,7 +159,7 @@ class CommandeDetailsPage extends StatelessWidget {
             pw.Text('Produits commandés :', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 10),
             ...commande.lignes.map((ligne) =>
-                pw.Text("- ${ligne.produit} x${ligne.quantite} : ${ligne.prix.toStringAsFixed(2)} DT")),
+                pw.Text("- ${ligne.produitNom} x${ligne.quantite} : ${ligne.total.toStringAsFixed(2)} DT")),
           ],
         ),
       ),

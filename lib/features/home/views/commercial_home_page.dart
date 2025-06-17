@@ -66,8 +66,6 @@ class CommercialHomePage extends StatelessWidget {
         ],
       ),
       body: Obx(() {
-        final percent = controller.currentYearProgress;
-
         return AnimationLimiter(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -84,14 +82,14 @@ class CommercialHomePage extends StatelessWidget {
                     "👋 Bonjour ${profileController.prenom.value} ${profileController.nom.value}",
                     style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.indigo),
                   ),
-                  const SizedBox(height: 8),
-                  _infoCard(Icons.location_on, "Vous êtes à Paris 15e"),
-                  const SizedBox(height: 12),
-                  _infoCard(Icons.campaign_outlined, "📢 ${reclamationController.mesReclamations.length} réclamations en attente\n🎯 Objectif : ${(percent * 100).toStringAsFixed(0)}% atteint !"),
+                 
                   const SizedBox(height: 24),
                   _sectionTitle("Vos Objectifs"),
                   _objectifOverview(controller),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
+            
+                  _infoCard(Icons.emoji_objects, "📢 ${reclamationController.mesReclamations.length} réclamations en attente🎯"),
+                  const SizedBox(height: 12),
                   _sectionTitle("Navigation rapide"),
                   const SizedBox(height: 12),
                   _buildGrid(context),
@@ -137,27 +135,87 @@ class CommercialHomePage extends StatelessWidget {
 
   Widget _objectifOverview(CommercialController controller) {
     final objectifs = controller.objectifs;
+    final colorScheme = Theme.of(Get.context!).colorScheme;
+
+    if (objectifs.isEmpty) {
+      return Center(
+        child: Text(
+          "Aucun objectif trouvé",
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
+        ),
+      );
+    }
 
     return Column(
       children: objectifs.map((obj) {
-        final objectif = (obj.objectif ?? 0).clamp(0.0, 100.0);
-        final realise = (obj.realise ?? 0).clamp(0.0, 100.0);
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(obj.categorie, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 6),
-              LinearProgressIndicator(
-                value: realise / 100,
-                backgroundColor: Colors.grey[300],
-                color: Colors.indigo,
-                minHeight: 10,
-              ),
-              const SizedBox(height: 4),
-              Text("Réalisé : ${realise.toStringAsFixed(0)}% / Objectif : ${objectif.toStringAsFixed(0)}%", style: const TextStyle(fontSize: 12))
-            ],
+        final double objectifValue = obj.objectif;
+        final double realiseValue = obj.realise;
+
+        double percentage = 0.0;
+        if (objectifValue > 0) {
+          percentage = (realiseValue / objectifValue).clamp(0.0, 1.0);
+        }
+
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          color: colorScheme.surface,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  obj.categorie.trim(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                LinearProgressIndicator(
+                  value: percentage,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  color: colorScheme.primary,
+                  minHeight: 12,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Réalisé : ${realiseValue.toStringAsFixed(1)}",
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      "Objectif : ${objectifValue.toStringAsFixed(1)}",
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    "${(percentage * 100).toStringAsFixed(1)}% atteint",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       }).toList(),

@@ -165,6 +165,7 @@ class CreateVisitePage extends StatelessWidget {
                       const SizedBox(height: 12),
                       DropdownButtonFormField<RaisonModel>(
                         value: controller.selectedRaison,
+                        isExpanded: true,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -177,7 +178,7 @@ class CreateVisitePage extends StatelessWidget {
                         items: controller.raisons.map((raison) {
                           return DropdownMenuItem(
                             value: raison,
-                            child: Text(raison.nom, style: TextStyle(color: colorScheme.onSurface)),
+                            child: Expanded(child: Text(raison.nom, style: TextStyle(color: colorScheme.onSurface), overflow: TextOverflow.ellipsis)),
                           );
                         }).toList(),
                         onChanged: (raison) => controller.setRaison(raison),

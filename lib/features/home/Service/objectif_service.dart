@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:pfe/core/utils/app_api.dart';
-import 'package:pfe/features/home/models/objectif_model.dart';
+import 'package:pfe/features/objectif/models/objectif_model.dart';
 
 class ObjectifService {
   final Dio dio = Dio(BaseOptions(baseUrl: AppApi.baseUrl));

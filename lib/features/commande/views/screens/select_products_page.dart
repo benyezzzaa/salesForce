@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pfe/core/routes/app_routes.dart';
 import 'package:pfe/core/utils/app_api.dart';
 import 'package:pfe/features/commande/controllers/produit_controller.dart';
 import '../../models/produit_model.dart';
@@ -292,13 +293,13 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
                   final selectedClient = commandeController.selectedClient.value;
                   if (selectedClient != null) {
                     await commandeController.createCommande(selectedClient.id, cart);
-                    Get.snackbar(
-                      'Succès',
-                      'Commande créée avec succès',
-                      backgroundColor: Colors.green,
-                      colorText: Colors.white,
-                    );
-                    Get.offAllNamed('/commercial-orders');
+                    // Get.snackbar(
+                    //   'Succès',
+                    //   'Commande créée avec succès',
+                    //   backgroundColor: Colors.green,
+                    //   colorText: Colors.white,
+                    // );
+                    Get.offAllNamed( AppRoutes.commandesPage) ;
                   }
                 }
               },

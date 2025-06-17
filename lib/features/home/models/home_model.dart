@@ -1,4 +1,4 @@
-import 'objectif_model.dart';
+import 'package:pfe/features/objectif/models/objectif_model.dart';
 
 class HomeModel {
   final List<ObjectifModel> objectifs;
