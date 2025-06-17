@@ -120,4 +120,67 @@ class VisiteService {
       return Result.error('Une erreur est survenue lors de la création du circuit');
     }
   }
+
+  Future<Result<CircuitModel>> getCircuitByDate({
+    required String token,
+    required DateTime date,
+  }) async {
+    try {
+      final dateString = date.toIso8601String().split('T').first;
+      final response = await http.get(
+        Uri.parse('${AppApi.baseUrl}/circuits/date/$dateString'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return Result.success(CircuitModel.fromJson(json.decode(response.body)));
+      } else if (response.statusCode == 404) {
+        return Result.error('Aucun circuit trouvé pour cette date');
+      } else {
+        final errorData = json.decode(response.body);
+        final errorMessage = errorData['message'] ?? 'Failed to get circuit';
+        print('Failed to get circuit - Status Code: ${response.statusCode}');
+        print('Error Message: $errorMessage');
+        return Result.error(errorMessage);
+      }
+    } catch (e) {
+      print('Exception during circuit retrieval: $e');
+      return Result.error('Une erreur est survenue lors de la récupération du circuit');
+    }
+  }
+
+  Future<Result<CircuitModel>> addClientToCircuit({
+    required String token,
+    required int circuitId,
+    required int clientId,
+  }) async {
+    try {
+      final response = await http.put(
+        Uri.parse('${AppApi.baseUrl}/circuits/$circuitId/clients'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'clientId': clientId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return Result.success(CircuitModel.fromJson(json.decode(response.body)));
+      } else {
+        final errorData = json.decode(response.body);
+        final errorMessage = errorData['message'] ?? 'Failed to add client to circuit';
+        print('Failed to add client to circuit - Status Code: ${response.statusCode}');
+        print('Error Message: $errorMessage');
+        return Result.error(errorMessage);
+      }
+    } catch (e) {
+      print('Exception during adding client to circuit: $e');
+      return Result.error('Une erreur est survenue lors de l\'ajout du client au circuit');
+    }
+  }
 } 

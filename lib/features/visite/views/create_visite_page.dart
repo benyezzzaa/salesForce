@@ -194,7 +194,39 @@ class CreateVisitePage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   if (!controller.isLoading.value) {
-                    await controller.createVisite();
+                    final success = await controller.createVisite();
+                    if (success) {
+                      // La modal de succès est déjà affichée par le contrôleur
+                      // Pas besoin de faire autre chose ici
+                    } else if (controller.error.isNotEmpty) {
+                      // Afficher l'erreur dans une modal si elle existe
+                      Get.dialog(
+                        AlertDialog(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          title: Row(
+                            children: [
+                              Icon(Icons.error_outline, color: Colors.red, size: 28),
+                              const SizedBox(width: 12),
+                              const Text('Erreur'),
+                            ],
+                          ),
+                          content: Text(
+                            controller.error.value,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          actions: [
+                            ElevatedButton(
+                              onPressed: () => Get.back(),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(
