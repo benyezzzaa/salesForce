@@ -18,7 +18,6 @@ class Result<T> {
 
 class VisiteService {
 
-
   Future<List<ClientModel>> getClients(String token) async {
     final response = await http.get(
       Uri.parse('${AppApi.baseUrl}/client'),
@@ -50,6 +49,52 @@ class VisiteService {
       return data.map((json) => RaisonModel.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load raisons');
+    }
+  }
+
+  Future<List<VisiteModel>> getAllVisites(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('${AppApi.baseUrl}/visites'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((json) => VisiteModel.fromJson(json)).toList();
+      } else {
+        print('Failed to load visites - Status Code: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Exception during visites loading: $e');
+      return [];
+    }
+  }
+
+  Future<List<CircuitModel>> getAllCircuits(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('${AppApi.baseUrl}/circuits'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((json) => CircuitModel.fromJson(json)).toList();
+      } else {
+        print('Failed to load circuits - Status Code: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Exception during circuits loading: $e');
+      return [];
     }
   }
 
@@ -125,8 +170,13 @@ class VisiteService {
     required String token,
     required DateTime date,
   }) async {
+    if (date == null) {
+      print('ERREUR: Date envoyée à getCircuitByDate est nulle !');
+      return Result.error('Date non définie');
+    }
+    final dateString = date.toIso8601String().split('T').first;
+    print('Appel API avec date: [35m$dateString[0m (objet: $date)');
     try {
-      final dateString = date.toIso8601String().split('T').first;
       final response = await http.get(
         Uri.parse('${AppApi.baseUrl}/circuits/date/$dateString'),
         headers: {

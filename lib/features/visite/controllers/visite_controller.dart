@@ -72,13 +72,20 @@ class VisiteController extends GetxController {
       );
 
       if (visiteResult.isSuccess) {
-        print("vvvvvvvvvvvviiiiiiiiiiiiiiiiiiisssssssssssssit t3333333333adaaaaaaaaaaaa");
+        print("Visite créée avec succès");
         
-        // Afficher la modal de succès
-        await _showSuccessModal();
-        
-        // Essayer de créer le circuit
-        await createCircuit();
+        // Récupérer les informations du commercial connecté
+        final commercial = getConnectedCommercial();
+        if (commercial != null) {
+          // Rediriger vers la page des positions pour voir le commercial et le client
+          Get.offAllNamed('/positions-map', arguments: {
+            'commercial': commercial,
+            'client': selectedClient,
+          });
+        } else {
+          // Fallback vers la page des visites si pas d'infos commercial
+          Get.offAllNamed('/all-visites-map');
+        }
         return true;
       } else {
         error.value = visiteResult.error ?? 'Une erreur inconnue est survenue lors de la création de la visite.';
@@ -86,7 +93,7 @@ class VisiteController extends GetxController {
       }
       
     } catch (e) {
-      error.value = 'Erreur inattendue lors de la création de la visite : ${e.toString()}';
+      error.value = 'Erreur inattendue lors de la création de la visite : '+e.toString();
       return false;
     } finally {
       isLoading.value = false;
@@ -127,103 +134,11 @@ class VisiteController extends GetxController {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  Text('📅 Date : ${_formatDate(selectedDate.value)}'),
-                  Text('👤 Client : ${selectedClient?.fullName}'),
-                  Text('📋 Raison : ${selectedRaison?.nom}'),
+                  Text('📅 Date : '+_formatDate(selectedDate.value)),
+                  Text('👤 Client : '+(selectedClient?.fullName ?? '')),
+                  Text('📋 Raison : '+(selectedRaison?.nom ?? '')),
                 ],
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Continuer'),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
-
-  Future<void> createCircuit() async {
-    if (selectedClient == null) {
-      error.value = 'Client non sélectionné pour la création du circuit.';
-      return;
-    }
-
-    error.value = '';
-
-    try {
-      final token = StorageService.getToken();
-      if (token == null) {
-        error.value = 'Token non trouvé. Veuillez vous reconnecter.';
-        return;
-      }
-
-      // D'abord, essayer de récupérer le circuit existant pour cette date
-      final existingCircuitResult = await _service.getCircuitByDate(
-        token: token,
-        date: selectedDate.value,
-      );
-
-      if (existingCircuitResult.isSuccess && existingCircuitResult.data != null) {
-        // Circuit existe déjà, ajouter le client au circuit existant
-        print("Circuit existant trouvé, ajout du client au circuit");
-        
-        final addClientResult = await _service.addClientToCircuit(
-          token: token,
-          circuitId: existingCircuitResult.data!.id,
-          clientId: selectedClient!.id,
-        );
-
-        if (addClientResult.isSuccess && addClientResult.data != null) {
-          print("Client ajouté au circuit existant avec succès");
-          await _showCircuitUpdatedModal(addClientResult.data!);
-        } else {
-          error.value = addClientResult.error ?? 'Erreur lors de l\'ajout du client au circuit existant.';
-        }
-      } else {
-        // Aucun circuit existant, créer un nouveau circuit
-        print("Aucun circuit existant, création d'un nouveau circuit");
-        
-        final circuitResult = await _service.createCircuit(
-          token: token,
-          date: selectedDate.value,
-          clientId: selectedClient!.id,
-        );
-
-        if (circuitResult.isSuccess && circuitResult.data != null && circuitResult.data!.clients.isNotEmpty) {
-          print("Nouveau circuit créé avec succès");
-          await _showCircuitModal(circuitResult.data!);
-        } else {
-          error.value = circuitResult.error ?? 'Erreur lors de la création du circuit.';
-        }
-      }
-
-    } catch (e) {
-      error.value = 'Erreur inattendue lors de la gestion du circuit: ${e.toString()}';
-    }
-  }
-
-  Future<void> _showCircuitModal(dynamic circuitData) async {
-    return Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(Icons.map, color: Colors.blue, size: 28),
-            const SizedBox(width: 12),
-            const Text('Circuit créé !'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Le circuit a été créé avec succès.',
-              style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 12),
             Container(
@@ -237,13 +152,12 @@ class VisiteController extends GetxController {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Voulez-vous voir le circuit sur la carte ?',
+                    'Que souhaitez-vous faire ?',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  Text('🗺️ Visualisez le trajet'),
-                  Text('📍 Voir tous les clients'),
-                  Text('🛣️ Tracer l\'itinéraire'),
+                  Text('➕ Créer une autre visite'),
+                  Text('🏠 Retourner à l\'accueil'),
                 ],
               ),
             ),
@@ -251,84 +165,25 @@ class VisiteController extends GetxController {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Plus tard'),
-          ),
-          ElevatedButton(
             onPressed: () {
               Get.back();
-              Get.toNamed(AppRoutes.mapCircuit, arguments: circuitData);
+              Get.offAllNamed('/home');
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Voir le circuit'),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
-
-  Future<void> _showCircuitUpdatedModal(dynamic circuitData) async {
-    return Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(Icons.update, color: Colors.green, size: 28),
-            const SizedBox(width: 12),
-            const Text('Circuit mis à jour !'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Le client a été ajouté au circuit existant.',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.green.shade200),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Voulez-vous voir le circuit mis à jour ?',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text('🗺️ Circuit du ${_formatDate(selectedDate.value)}'),
-                  Text('📍 ${circuitData.clients.length} client(s) au total'),
-                  Text('✅ Client ajouté avec succès'),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Plus tard'),
+            child: const Text('Accueil'),
           ),
           ElevatedButton(
             onPressed: () {
               Get.back();
-              Get.toNamed(AppRoutes.mapCircuit, arguments: circuitData);
+              // Réinitialiser les sélections pour une nouvelle visite
+              selectedClient = null;
+              selectedRaison = null;
+              // La page se recharge automatiquement
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Voir le circuit'),
+            child: const Text('Nouvelle visite'),
           ),
         ],
       ),
@@ -350,5 +205,40 @@ class VisiteController extends GetxController {
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  // Méthode pour récupérer les informations du commercial connecté
+  Map<String, dynamic>? getConnectedCommercial() {
+    return StorageService.getUser();
+  }
+
+  // Méthode pour afficher la carte avec les positions
+  void showPositionsMap() {
+    if (selectedClient == null) {
+      Get.snackbar(
+        'Erreur',
+        'Veuillez d\'abord sélectionner un client',
+        backgroundColor: Get.theme?.colorScheme?.errorContainer,
+        colorText: Get.theme?.colorScheme?.onErrorContainer,
+      );
+      return;
+    }
+
+    final commercial = getConnectedCommercial();
+    if (commercial == null) {
+      Get.snackbar(
+        'Erreur',
+        'Impossible de récupérer les informations du commercial',
+        backgroundColor: Get.theme?.colorScheme?.errorContainer,
+        colorText: Get.theme?.colorScheme?.onErrorContainer,
+      );
+      return;
+    }
+
+    // Naviguer vers la page de carte avec les positions
+    Get.toNamed('/positions-map', arguments: {
+      'commercial': commercial,
+      'client': selectedClient,
+    });
   }
 } 

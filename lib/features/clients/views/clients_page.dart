@@ -116,14 +116,42 @@ final adresseController = TextEditingController();
                           Text(client.adresse ?? 'Adresse inconnue'),
                         ],
                       ),
-                      trailing: Switch(
-                        value: client.isActive,
-                        activeColor: colorScheme.primary,
-                        inactiveThumbColor: colorScheme.outline,
-                        inactiveTrackColor: colorScheme.surfaceVariant,
-                        onChanged: (value) {
-                          clientController.toggleClientStatus(client.id, value);
-                        },
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Bouton pour voir la position sur la carte
+                          if (client.latitude != null && client.longitude != null)
+                            IconButton(
+                              icon: Icon(Icons.map, color: colorScheme.primary),
+                              onPressed: () {
+                                final commercial = clientController.getConnectedCommercial();
+                                if (commercial != null) {
+                                  Get.toNamed('/positions-map', arguments: {
+                                    'commercial': commercial,
+                                    'client': client,
+                                  });
+                                } else {
+                                  Get.snackbar(
+                                    'Erreur',
+                                    'Impossible de récupérer les informations du commercial',
+                                    backgroundColor: colorScheme.errorContainer,
+                                    colorText: colorScheme.onErrorContainer,
+                                  );
+                                }
+                              },
+                              tooltip: 'Voir sur la carte',
+                            ),
+                          // Switch pour activer/désactiver le client
+                          Switch(
+                            value: client.isActive,
+                            activeColor: colorScheme.primary,
+                            inactiveThumbColor: colorScheme.outline,
+                            inactiveTrackColor: colorScheme.surfaceVariant,
+                            onChanged: (value) {
+                              clientController.toggleClientStatus(client.id, value);
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   );

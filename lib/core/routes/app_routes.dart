@@ -15,29 +15,35 @@ import 'package:pfe/features/reclamation/reclamation_home_page.dart';
 import 'package:pfe/features/reclamation/reclamations_page.dart';
 import 'package:pfe/features/visite/views/create_visite_page.dart';
 import 'package:pfe/features/visite/views/map_circuit_page.dart';
+import 'package:pfe/features/visite/views/all_visites_map_page.dart';
+import 'package:pfe/features/visite/views/circuit_viewer_page.dart';
+import 'package:pfe/features/visite/views/positions_map_page.dart';
 import 'package:pfe/features/notifications/notifications_page.dart';
 
 
 class AppRoutes {
-  static const loginPage = '/login';
-  static const homePage = '/home';
-  static const commandesPage = '/commandes';
-  static const selectProducts = '/select-products';
-  static const selectClient = '/select-client';
-  static const clientsPage = '/clients';
-  static const visitesPage = '/visites';
-  static const visiteForm = '/visite-form';
-  static const mapCircuit = '/map-circuit';
-  static const mesReclamations = '/reclamations/mes';
-  static const newReclamation = '/reclamations/new';
-  static const reclamationHome = '/reclamations/home';
-  static const cataloguePage = '/catalogue';
-  static const visiteCreate = '/visite/create';
-  static const notificationsPage = '/notifications';
-  static const documentsValidesPage = '/documents-valides';
-  static const profilePage = '/profile';
-  static const objectifsPage = '/objectifs';
-  static const bottomNavWrapper= '/bottomNavWrapper';
+  static const String loginPage = '/login';
+  static const String homePage = '/home';
+  static const String commandesPage = '/commandes';
+  static const String selectProducts = '/select-products';
+  static const String selectClient = '/select-client';
+  static const String clientsPage = '/clients';
+  static const String visitesPage = '/visites';
+  static const String visiteForm = '/visite-form';
+  static const String mapCircuit = '/map-circuit';
+  static const String allVisitesMap = '/all-visites-map';
+  static const String circuitViewer = '/circuit-viewer';
+  static const String mesReclamations = '/reclamations';
+  static const String newReclamation = '/new-reclamation';
+  static const String reclamationHome = '/reclamations/home';
+  static const String cataloguePage = '/catalogue';
+  static const String visiteCreate = '/visite/create';
+  static const String positionsMap = '/positions-map';
+  static const String notificationsPage = '/notifications';
+  static const String documentsValidesPage = '/documents-valides';
+  static const String profilePage = '/profile';
+  static const String objectifsPage = '/objectifs';
+  static const String bottomNavWrapper = '/bottom-nav-wrapper';
 
 
 }
@@ -57,6 +63,9 @@ class AppPages {
     GetPage(name: AppRoutes.cataloguePage, page: () => const CataloguePage()),
     GetPage(name: AppRoutes.visiteCreate, page: () => const CreateVisitePage()),
     GetPage(name: AppRoutes.mapCircuit, page: () => const MapCircuitPage()),
+    GetPage(name: AppRoutes.allVisitesMap, page: () => const AllVisitesMapPage()),
+    GetPage(name: AppRoutes.circuitViewer, page: () => const CircuitViewerPage()),
+    GetPage(name: AppRoutes.positionsMap, page: () => const PositionsMapPage()),
     GetPage(name: AppRoutes.notificationsPage, page: () => const NotificationsPage()),
     GetPage(name: AppRoutes.documentsValidesPage, page: () => const DocumentsValidesPage()),
     GetPage(name: AppRoutes.objectifsPage, page: () => ObjectifsPage()),

@@ -2,7 +2,7 @@
 
 class AppApi {
   // Base URL
-  static const String baseUrl = "http://192.168.1.6:4000";
+  static const String baseUrl = "http://192.168.1.8:4000";
   static const String loginUrl = "$baseUrl/auth/login";
   static const String getCommandeUrl = "$baseUrl/commandes";
   static const String getClientsUrl = "$baseUrl/client";

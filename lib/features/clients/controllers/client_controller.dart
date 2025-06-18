@@ -113,4 +113,9 @@ class ClientController extends GetxController {
       return null;
     }
   }
+
+  // Méthode pour récupérer les informations du commercial connecté
+  Map<String, dynamic>? getConnectedCommercial() {
+    return StorageService.getUser();
+  }
 }

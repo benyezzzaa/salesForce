@@ -25,9 +25,9 @@ class _MapCircuitPageState extends State<MapCircuitPage> {
   @override
   void initState() {
     super.initState();
-    if (circuit == null || circuit!.clients.isEmpty) {
+    if (circuit == null) {
       setState(() {
-        _error = 'Aucune donnée client valide trouvée pour afficher le circuit.';
+        _error = 'Aucune donnée de circuit fournie.';
         _isLoading = false;
       });
     } else {
@@ -125,7 +125,7 @@ class _MapCircuitPageState extends State<MapCircuitPage> {
   }
 
   void _createRoute() {
-    if (circuit == null || circuit!.clients.length < 2) return;
+    if (circuit == null || circuit!.clients.isEmpty) return;
 
     List<LatLng> routePoints = [];
     
@@ -141,7 +141,8 @@ class _MapCircuitPageState extends State<MapCircuitPage> {
       }
     }
 
-    if (routePoints.length >= 2) {
+    // Créer la route même avec un seul point (pour afficher le marqueur)
+    if (routePoints.isNotEmpty) {
       setState(() {
         polylines.add(Polyline(
           polylineId: const PolylineId('circuit_route'),
@@ -177,20 +178,28 @@ class _MapCircuitPageState extends State<MapCircuitPage> {
     }
 
     if (allPoints.isNotEmpty) {
-      double minLat = allPoints.map((p) => p.latitude).reduce((a, b) => a < b ? a : b);
-      double maxLat = allPoints.map((p) => p.latitude).reduce((a, b) => a > b ? a : b);
-      double minLng = allPoints.map((p) => p.longitude).reduce((a, b) => a < b ? a : b);
-      double maxLng = allPoints.map((p) => p.longitude).reduce((a, b) => a > b ? a : b);
+      if (allPoints.length == 1) {
+        // Si un seul point, zoomer dessus
+        mapController?.animateCamera(
+          CameraUpdate.newLatLngZoom(allPoints.first, 15.0),
+        );
+      } else {
+        // Si plusieurs points, ajuster les bounds
+        double minLat = allPoints.map((p) => p.latitude).reduce((a, b) => a < b ? a : b);
+        double maxLat = allPoints.map((p) => p.latitude).reduce((a, b) => a > b ? a : b);
+        double minLng = allPoints.map((p) => p.longitude).reduce((a, b) => a < b ? a : b);
+        double maxLng = allPoints.map((p) => p.longitude).reduce((a, b) => a > b ? a : b);
 
-      mapController?.animateCamera(
-        CameraUpdate.newLatLngBounds(
-          LatLngBounds(
-            southwest: LatLng(minLat - 0.01, minLng - 0.01),
-            northeast: LatLng(maxLat + 0.01, maxLng + 0.01),
+        mapController?.animateCamera(
+          CameraUpdate.newLatLngBounds(
+            LatLngBounds(
+              southwest: LatLng(minLat - 0.01, minLng - 0.01),
+              northeast: LatLng(maxLat + 0.01, maxLng + 0.01),
+            ),
+            50.0,
           ),
-          50.0,
-        ),
-      );
+        );
+      }
     }
   }
 

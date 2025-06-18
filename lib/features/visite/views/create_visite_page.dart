@@ -140,6 +140,28 @@ class CreateVisitePage extends StatelessWidget {
                         dropdownColor: colorScheme.surface,
                         icon: Icon(Icons.arrow_drop_down, color: colorScheme.onSurfaceVariant),
                       ),
+                      // Bouton pour afficher les positions
+                      if (controller.selectedClient != null) ...[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () => controller.showPositionsMap(),
+                            icon: Icon(Icons.map, color: colorScheme.primary),
+                            label: Text(
+                              'Voir les positions sur la carte',
+                              style: TextStyle(color: colorScheme.primary),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              side: BorderSide(color: colorScheme.primary),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
