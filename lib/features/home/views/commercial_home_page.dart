@@ -26,7 +26,7 @@ class CommercialHomePage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.indigo.shade600,
         elevation: 0,
-        title: const Text('Digital Process ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+        title: const Text('Digital Process ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600 , color: Colors.white)),
         actions: [
           Obx(() {
             return GestureDetector(

@@ -34,7 +34,7 @@ class AppRoutes {
   static const String allVisitesMap = '/all-visites-map';
   static const String circuitViewer = '/circuit-viewer';
   static const String mesReclamations = '/reclamations';
-  static const String newReclamation = '/new-reclamation';
+  static const String newReclamation = '/reclamations/new';
   static const String reclamationHome = '/reclamations/home';
   static const String cataloguePage = '/catalogue';
   static const String visiteCreate = '/visite/create';
@@ -58,7 +58,10 @@ class AppPages {
     GetPage(name: AppRoutes.clientsPage, page: () => const ClientsPage()),
    
     GetPage(name: AppRoutes.mesReclamations, page: () => MesReclamationsPage()),
-    GetPage(name: AppRoutes.newReclamation, page: () => ReclamationFormPage()),
+   GetPage(
+  name: AppRoutes.newReclamation,
+  page: () => ReclamationFormPage(),
+),
     GetPage(name: AppRoutes.reclamationHome, page: () => const ReclamationHomePage()),
     GetPage(name: AppRoutes.cataloguePage, page: () => const CataloguePage()),
     GetPage(name: AppRoutes.visiteCreate, page: () => const CreateVisitePage()),

@@ -17,7 +17,8 @@ class _AddClientPageState extends State<AddClientPage> {
   final _emailController = TextEditingController();
   final _telephoneController = TextEditingController();
   final _adresseController = TextEditingController();
-  
+  final _codeFiscaleController = TextEditingController(); // ✅ Nouveau champ
+
   final ClientController clientController = Get.find<ClientController>();
   GoogleMapController? mapController;
   LatLng? selectedLocation;
@@ -30,6 +31,7 @@ class _AddClientPageState extends State<AddClientPage> {
     _emailController.dispose();
     _telephoneController.dispose();
     _adresseController.dispose();
+    _codeFiscaleController.dispose(); // ✅ Dispose ici aussi
     mapController?.dispose();
     super.dispose();
   }
@@ -72,6 +74,7 @@ class _AddClientPageState extends State<AddClientPage> {
         telephone: _telephoneController.text,
         latitude: selectedLocation!.latitude,
         longitude: selectedLocation!.longitude,
+        codeFiscale: _codeFiscaleController.text, // ✅ Passer ici
       );
 
       if (client != null) {
@@ -98,7 +101,7 @@ class _AddClientPageState extends State<AddClientPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ajouter un client'),
-        backgroundColor: Colors.indigo.shade600,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       body: Form(
         key: _formKey,
@@ -150,6 +153,28 @@ class _AddClientPageState extends State<AddClientPage> {
               maxLines: 2,
             ),
             const SizedBox(height: 16),
+
+            // ✅ Champ Code Fiscal
+            TextFormField(
+              controller: _codeFiscaleController,
+              decoration: const InputDecoration(
+                labelText: 'Code fiscal *',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              maxLength: 13,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Code fiscal requis';
+                }
+                if (!RegExp(r'^\d{13}$').hasMatch(value)) {
+                  return 'Le code fiscal doit contenir exactement 13 chiffres';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+
             const Text(
               'Sélectionnez la position sur la carte *',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -201,4 +226,4 @@ class _AddClientPageState extends State<AddClientPage> {
       ),
     );
   }
-} 
+}

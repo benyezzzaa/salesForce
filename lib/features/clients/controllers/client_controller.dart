@@ -92,6 +92,7 @@ class ClientController extends GetxController {
     required String telephone,
     required double latitude,
     required double longitude,
+    required String codeFiscale,
   }) async {
     try {
       final response = await _api.post(AppApi.getClientsUrl, {
@@ -99,6 +100,7 @@ class ClientController extends GetxController {
         'prenom': prenom,
         'email': email,
         'adresse': adresse,
+        'codeFiscale': codeFiscale,
         'telephone': telephone,
         'latitude': latitude,
         'longitude': longitude,

@@ -4,7 +4,7 @@ import 'package:pfe/features/reclamation/Controller/reclamation_controller.dart'
 
 
 class ReclamationFormPage extends StatelessWidget {
-  final controller = Get.put(ReclamationController());
+  final controller = Get.find<ReclamationController>();
 
   ReclamationFormPage({super.key});
 

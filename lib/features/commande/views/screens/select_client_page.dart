@@ -16,17 +16,18 @@ class _SelectClientPageState extends State<SelectClientPage> {
   final ClientController clientController = Get.put(ClientController());
   final CommandeController commandeController = Get.put(CommandeController());
   final searchController = TextEditingController();
-  String searchQuery = '';
 
   final nameController = TextEditingController();
   final prenomController = TextEditingController();
   final emailController = TextEditingController();
   final addressController = TextEditingController();
   final phoneController = TextEditingController();
+  final codeFiscaleController = TextEditingController(); // ✅ nouveau champ
 
   GoogleMapController? mapController;
   LatLng? selectedLocation;
   Set<Marker> markers = {};
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -44,6 +45,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
     emailController.dispose();
     addressController.dispose();
     phoneController.dispose();
+    codeFiscaleController.dispose(); // ✅ dispose
     mapController?.dispose();
     super.dispose();
   }
@@ -65,7 +67,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
     });
   }
 
-  void _showAddClientDialog(BuildContext context, Map<int, int> cart) {
+  void _showAddClientDialog(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
@@ -76,61 +78,17 @@ class _SelectClientPageState extends State<SelectClientPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: "Nom",
-                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
-                  ),
-                  style: TextStyle(color: colorScheme.onSurface),
-                ),
+                _buildTextField(nameController, "Nom", colorScheme),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: prenomController,
-                  decoration: InputDecoration(
-                    labelText: "Prénom",
-                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
-                  ),
-                  style: TextStyle(color: colorScheme.onSurface),
-                ),
+                _buildTextField(prenomController, "Prénom", colorScheme),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    labelText: "Email",
-                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
-                  ),
-                  style: TextStyle(color: colorScheme.onSurface),
-                ),
+                _buildTextField(emailController, "Email", colorScheme),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: addressController,
-                  decoration: InputDecoration(
-                    labelText: "Adresse",
-                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
-                  ),
-                  style: TextStyle(color: colorScheme.onSurface),
-                ),
+                _buildTextField(addressController, "Adresse", colorScheme),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: "Téléphone",
-                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
-                  ),
-                  style: TextStyle(color: colorScheme.onSurface),
-                ),
+                _buildTextField(phoneController, "Téléphone", colorScheme, inputType: TextInputType.phone),
+                const SizedBox(height: 16),
+                _buildTextField(codeFiscaleController, "Code fiscal (13 chiffres)", colorScheme, inputType: TextInputType.number, maxLength: 13),
                 const SizedBox(height: 16),
                 const Text(
                   'Sélectionnez la position sur la carte *',
@@ -149,7 +107,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
                       onMapCreated: _onMapCreated,
                       onTap: _onMapTap,
                       initialCameraPosition: const CameraPosition(
-                        target: LatLng(36.8065, 10.1815), // Tunis
+                        target: LatLng(36.8065, 10.1815),
                         zoom: 12,
                       ),
                       markers: markers,
@@ -159,13 +117,14 @@ class _SelectClientPageState extends State<SelectClientPage> {
                     ),
                   ),
                 ),
-                if (selectedLocation != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    'Position sélectionnée: ${selectedLocation!.latitude.toStringAsFixed(4)}, ${selectedLocation!.longitude.toStringAsFixed(4)}',
-                    style: const TextStyle(fontSize: 14),
+                if (selectedLocation != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Position sélectionnée: ${selectedLocation!.latitude.toStringAsFixed(4)}, ${selectedLocation!.longitude.toStringAsFixed(4)}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
                   ),
-                ],
               ],
             ),
           ),
@@ -176,11 +135,12 @@ class _SelectClientPageState extends State<SelectClientPage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (nameController.text.isNotEmpty && prenomController.text.isNotEmpty && selectedLocation != null) {
-                  Get.dialog(
-                    const Center(child: CircularProgressIndicator()),
-                    barrierDismissible: false,
-                  );
+                if (nameController.text.isNotEmpty &&
+                    prenomController.text.isNotEmpty &&
+                    codeFiscaleController.text.length == 13 &&
+                    RegExp(r'^\d{13}$').hasMatch(codeFiscaleController.text) &&
+                    selectedLocation != null) {
+                  Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
 
                   final newClient = await clientController.addClient(
                     nom: nameController.text,
@@ -188,6 +148,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
                     email: emailController.text,
                     adresse: addressController.text,
                     telephone: phoneController.text,
+                    codeFiscale: codeFiscaleController.text,
                     latitude: selectedLocation!.latitude,
                     longitude: selectedLocation!.longitude,
                   );
@@ -200,6 +161,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
                     emailController.clear();
                     addressController.clear();
                     phoneController.clear();
+                    codeFiscaleController.clear();
                     setState(() {
                       selectedLocation = null;
                       markers = {};
@@ -212,7 +174,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
                 } else {
                   Get.snackbar(
                     'Erreur',
-                    'Veuillez remplir tous les champs obligatoires et sélectionner une position',
+                    'Veuillez remplir tous les champs et saisir un code fiscal valide (13 chiffres)',
                     backgroundColor: Colors.red,
                     colorText: Colors.white,
                   );
@@ -223,6 +185,22 @@ class _SelectClientPageState extends State<SelectClientPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label, ColorScheme colorScheme,
+      {TextInputType inputType = TextInputType.text, int? maxLength}) {
+    return TextField(
+      controller: controller,
+      keyboardType: inputType,
+      maxLength: maxLength,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.outlineVariant)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
+      ),
+      style: TextStyle(color: colorScheme.onSurface),
     );
   }
 
@@ -272,7 +250,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
                       const Text("Aucun client trouvé"),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: () => _showAddClientDialog(context, {}),
+                        onPressed: () => _showAddClientDialog(context),
                         child: const Text("Ajouter un nouveau client"),
                       ),
                     ],
@@ -299,12 +277,13 @@ class _SelectClientPageState extends State<SelectClientPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){ Get.to(() => const AddClientPage())?.then((added) {
-      if (added == true) {
-        clientController.fetchMesClients();
-      }
-    });},
-        //  => _showAddClientDialog(context, {}),
+        onPressed: () {
+          Get.to(() => const AddClientPage())?.then((added) {
+            if (added == true) {
+              clientController.fetchMesClients();
+            }
+          });
+        },
         child: const Icon(Icons.add),
       ),
     );
