@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:pfe/core/utils/storage_services.dart';
 import 'package:pfe/core/routes/app_routes.dart';
-import '../models/client_model.dart';
+import 'package:pfe/features/clients/models/client_model.dart';
 import '../models/raison_model.dart';
 import '../models/visite_model.dart';
 import '../services/visite_service.dart';
@@ -74,18 +74,8 @@ class VisiteController extends GetxController {
       if (visiteResult.isSuccess) {
         print("Visite créée avec succès");
         
-        // Récupérer les informations du commercial connecté
-        final commercial = getConnectedCommercial();
-        if (commercial != null) {
-          // Rediriger vers la page des positions pour voir le commercial et le client
-          Get.offAllNamed('/positions-map', arguments: {
-            'commercial': commercial,
-            'client': selectedClient,
-          });
-        } else {
-          // Fallback vers la page des visites si pas d'infos commercial
-          Get.offAllNamed('/all-visites-map');
-        }
+        // Ne pas naviguer ici, laisser la page de création gérer la navigation
+        // La page de création utilisera Navigator.pop(context, true) pour revenir à la carte
         return true;
       } else {
         error.value = visiteResult.error ?? 'Une erreur inconnue est survenue lors de la création de la visite.';
@@ -100,96 +90,7 @@ class VisiteController extends GetxController {
     }
   }
 
-  Future<void> _showSuccessModal() async {
-    return Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 28),
-            const SizedBox(width: 12),
-            const Text('Visite créée !'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'La visite a été créée avec succès.',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Détails de la visite :',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text('📅 Date : '+_formatDate(selectedDate.value)),
-                  Text('👤 Client : '+(selectedClient?.fullName ?? '')),
-                  Text('📋 Raison : '+(selectedRaison?.nom ?? '')),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.shade200),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Que souhaitez-vous faire ?',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text('➕ Créer une autre visite'),
-                  Text('🏠 Retourner à l\'accueil'),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              Get.offAllNamed('/home');
-            },
-            child: const Text('Accueil'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              // Réinitialiser les sélections pour une nouvelle visite
-              selectedClient = null;
-              selectedRaison = null;
-              // La page se recharge automatiquement
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Nouvelle visite'),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
+
 
   void setDate(DateTime date) {
     selectedDate.value = date;

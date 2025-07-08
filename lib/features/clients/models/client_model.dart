@@ -6,8 +6,8 @@ class ClientModel {
   final String telephone;
   final String adresse;
   final bool isActive;
-  final double latitude;
-  final double longitude;
+  final double? latitude;
+  final double? longitude;
 
   ClientModel({
     required this.id,
@@ -17,8 +17,8 @@ class ClientModel {
     required this.telephone,
     required this.adresse,
     required this.isActive,
-    required this.latitude,
-    required this.longitude,
+    this.latitude,
+    this.longitude,
   });
 
   factory ClientModel.fromJson(Map<String, dynamic> json) {
@@ -30,8 +30,8 @@ class ClientModel {
       telephone: json['telephone'],
       adresse: json['adresse'],
       isActive: json['isActive'] ?? true,
-      latitude: (json['latitude'] ?? 0).toDouble(),
-      longitude: (json['longitude'] ?? 0).toDouble(),
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
     );
   }
 

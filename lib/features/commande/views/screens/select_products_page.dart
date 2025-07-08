@@ -293,13 +293,6 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
                   final selectedClient = commandeController.selectedClient.value;
                   if (selectedClient != null) {
                     await commandeController.createCommande(selectedClient.id, cart);
-                    // Get.snackbar(
-                    //   'Succès',
-                    //   'Commande créée avec succès',
-                    //   backgroundColor: Colors.green,
-                    //   colorText: Colors.white,
-                    // );
-                    Get.offAllNamed( AppRoutes.commandesPage) ;
                   }
                 }
               },

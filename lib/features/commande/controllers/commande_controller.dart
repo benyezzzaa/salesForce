@@ -1,7 +1,8 @@
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import '../models/commande_model.dart';
 import '../services/commande_service.dart';
-import 'package:pfe/features/visite/models/client_model.dart';
+import 'package:pfe/features/clients/models/client_model.dart';
 
 class CommandeController extends GetxController {
   final commandes = <CommandeModel>[].obs;
@@ -52,26 +53,56 @@ class CommandeController extends GetxController {
       // Rafraîchir les données après création
       fetchCommandes();
       
-      Get.snackbar(
-        'Succès', 
-        'Commande créée avec succès ✅',
-        backgroundColor: Get.theme?.colorScheme?.primaryContainer,
-        colorText: Get.theme?.colorScheme?.onPrimaryContainer,
-      );
+      // Afficher la popup de confirmation
+      await _showSuccessDialog();
       
-      // Retourner à la page des commandes
-      Get.offNamed('/commercial-orders');
     } catch (e) {
       print(e);
-      // Get.snackbar(
-      //   'Erreur', 
-      //   'Impossible de créer la commande',
-      //   backgroundColor: Get.theme?.colorScheme?.errorContainer,
-      //   colorText: Get.theme?.colorScheme?.onErrorContainer,
-      // );
+      Get.snackbar(
+        'Erreur', 
+        'Impossible de créer la commande',
+        backgroundColor: Get.theme?.colorScheme?.errorContainer,
+        colorText: Get.theme?.colorScheme?.onErrorContainer,
+      );
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> _showSuccessDialog() async {
+    await Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green, size: 28),
+            SizedBox(width: 8),
+            Text('Succès', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Text(
+          'Commande créée avec succès !',
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back(); // Fermer la popup
+              Get.offAllNamed('/commandes'); // Naviguer vers la page des commandes
+            },
+            child: Text(
+              'OK',
+              style: TextStyle(
+                color: Get.theme?.colorScheme?.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
   }
 
   void setSelectedClient(ClientModel client) {

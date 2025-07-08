@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:pfe/core/utils/app_api.dart';
-import '../models/client_model.dart';
+import 'package:pfe/features/clients/models/client_model.dart';
 import '../models/raison_model.dart';
 import '../models/visite_model.dart';
 import '../models/circuit_model.dart';
@@ -26,6 +26,8 @@ class VisiteService {
          'Content-Type': 'application/json',
       },
     );
+
+    print('Réponse API clients : ' + response.body);
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -54,46 +56,194 @@ class VisiteService {
 
   Future<List<VisiteModel>> getAllVisites(String token) async {
     try {
+      print('🔄 Appel API getAllVisites...');
+      
+      // Essayer d'abord l'endpoint spécifique au commercial connecté
+      String url = AppApi.getMyVisitesUrl;
+      print('   URL: $url');
+      print('   Token: ${token.substring(0, 10)}...');
+      
       final response = await http.get(
-        Uri.parse('${AppApi.baseUrl}/visites'),
+        Uri.parse(url),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
       );
 
+      print('📡 Réponse API getAllVisites:');
+      print('   Status Code: ${response.statusCode}');
+      print('   Body: ${response.body}');
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => VisiteModel.fromJson(json)).toList();
+        print('   ✅ Données parsées: ${data.length} visites');
+        
+        final visites = data.map((json) => VisiteModel.fromJson(json)).toList();
+        
+        // Analyser chaque visite
+        for (int i = 0; i < visites.length; i++) {
+          final visite = visites[i];
+          final hasCoords = visite.client.latitude != null && visite.client.longitude != null;
+          print('   ${i + 1}. Visite ${visite.id} - Client: ${visite.client.fullName} - Date: ${visite.date} - Coordonnées: ${hasCoords ? "✅" : "❌"}');
+        }
+        
+        return visites;
+      } else if (response.statusCode == 404) {
+        // Si l'endpoint spécifique n'existe pas, essayer l'endpoint général
+        print('⚠️ Endpoint spécifique non trouvé, essai avec l\'endpoint général...');
+        return await _getAllVisitesGeneral(token);
       } else {
-        print('Failed to load visites - Status Code: ${response.statusCode}');
+        print('❌ Erreur API getAllVisites - Status: ${response.statusCode}');
+        print('   Body: ${response.body}');
         return [];
       }
     } catch (e) {
-      print('Exception during visites loading: $e');
+      print('❌ Exception getAllVisites: $e');
+      // En cas d'erreur, essayer l'endpoint général
+      return await _getAllVisitesGeneral(token);
+    }
+  }
+
+  Future<List<VisiteModel>> _getAllVisitesGeneral(String token) async {
+    try {
+      print('🔄 Appel API getAllVisites (endpoint général)...');
+      print('   URL: ${AppApi.getVisitesUrl}');
+      
+      final response = await http.get(
+        Uri.parse(AppApi.getVisitesUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      print('📡 Réponse API getAllVisites (général):');
+      print('   Status Code: ${response.statusCode}');
+      print('   Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        print('   ✅ Données parsées (général): ${data.length} visites');
+        
+        final visites = data.map((json) => VisiteModel.fromJson(json)).toList();
+        
+        // Analyser chaque visite
+        for (int i = 0; i < visites.length; i++) {
+          final visite = visites[i];
+          final hasCoords = visite.client.latitude != null && visite.client.longitude != null;
+          print('   ${i + 1}. Visite ${visite.id} - Client: ${visite.client.fullName} - Date: ${visite.date} - Coordonnées: ${hasCoords ? "✅" : "❌"}');
+        }
+        
+        return visites;
+      } else {
+        print('❌ Erreur API getAllVisites (général) - Status: ${response.statusCode}');
+        print('   Body: ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('❌ Exception getAllVisites (général): $e');
       return [];
     }
   }
 
   Future<List<CircuitModel>> getAllCircuits(String token) async {
     try {
+      print('🔄 Appel API getAllCircuits...');
+      
+      // Essayer d'abord l'endpoint spécifique au commercial connecté
+      String url = AppApi.getMyCircuitsUrl;
+      print('   URL: $url');
+      print('   Token: ${token.substring(0, 10)}...');
+      
       final response = await http.get(
-        Uri.parse('${AppApi.baseUrl}/circuits'),
+        Uri.parse(url),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
       );
 
+      print('📡 Réponse API getAllCircuits:');
+      print('   Status Code: ${response.statusCode}');
+      print('   Body: ${response.body}');
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => CircuitModel.fromJson(json)).toList();
+        print('   ✅ Données parsées: ${data.length} circuits');
+        
+        final circuits = data.map((json) => CircuitModel.fromJson(json)).toList();
+        
+        // Analyser chaque circuit
+        for (int i = 0; i < circuits.length; i++) {
+          final circuit = circuits[i];
+          print('   ${i + 1}. Circuit ${circuit.id} - Date: ${circuit.date} - Clients: ${circuit.clients.length}');
+          for (int j = 0; j < circuit.clients.length; j++) {
+            final client = circuit.clients[j];
+            final hasCoords = client.latitude != null && client.longitude != null;
+            print('      ${j + 1}. Client: ${client.fullName} - Coordonnées: ${hasCoords ? "✅" : "❌"}');
+          }
+        }
+        
+        return circuits;
+      } else if (response.statusCode == 404) {
+        // Si l'endpoint spécifique n'existe pas, essayer l'endpoint général
+        print('⚠️ Endpoint spécifique non trouvé, essai avec l\'endpoint général...');
+        return await _getAllCircuitsGeneral(token);
       } else {
-        print('Failed to load circuits - Status Code: ${response.statusCode}');
+        print('❌ Erreur API getAllCircuits - Status: ${response.statusCode}');
+        print('   Body: ${response.body}');
         return [];
       }
     } catch (e) {
-      print('Exception during circuits loading: $e');
+      print('❌ Exception getAllCircuits: $e');
+      // En cas d'erreur, essayer l'endpoint général
+      return await _getAllCircuitsGeneral(token);
+    }
+  }
+
+  Future<List<CircuitModel>> _getAllCircuitsGeneral(String token) async {
+    try {
+      print('🔄 Appel API getAllCircuits (endpoint général)...');
+      print('   URL: ${AppApi.getCircuitsUrl}');
+      
+      final response = await http.get(
+        Uri.parse(AppApi.getCircuitsUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      print('📡 Réponse API getAllCircuits (général):');
+      print('   Status Code: ${response.statusCode}');
+      print('   Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        print('   ✅ Données parsées (général): ${data.length} circuits');
+        
+        final circuits = data.map((json) => CircuitModel.fromJson(json)).toList();
+        
+        // Analyser chaque circuit
+        for (int i = 0; i < circuits.length; i++) {
+          final circuit = circuits[i];
+          print('   ${i + 1}. Circuit ${circuit.id} - Date: ${circuit.date} - Clients: ${circuit.clients.length}');
+          for (int j = 0; j < circuit.clients.length; j++) {
+            final client = circuit.clients[j];
+            final hasCoords = client.latitude != null && client.longitude != null;
+            print('      ${j + 1}. Client: ${client.fullName} - Coordonnées: ${hasCoords ? "✅" : "❌"}');
+          }
+        }
+        
+        return circuits;
+      } else {
+        print('❌ Erreur API getAllCircuits (général) - Status: ${response.statusCode}');
+        print('   Body: ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('❌ Exception getAllCircuits (général): $e');
       return [];
     }
   }
@@ -175,7 +325,7 @@ class VisiteService {
       return Result.error('Date non définie');
     }
     final dateString = date.toIso8601String().split('T').first;
-    print('Appel API avec date: [35m$dateString[0m (objet: $date)');
+    print('Appel API avec date:  [35m$dateString [0m (objet: $date)');
     try {
       final response = await http.get(
         Uri.parse('${AppApi.baseUrl}/circuits/date/$dateString'),
@@ -231,6 +381,102 @@ class VisiteService {
     } catch (e) {
       print('Exception during adding client to circuit: $e');
       return Result.error('Une erreur est survenue lors de l\'ajout du client au circuit');
+    }
+  }
+
+  // Méthode de test pour diagnostiquer les problèmes d'API
+  Future<void> testApiEndpoints(String token) async {
+    print('\n🔍 TEST DES ENDPOINTS API...');
+    
+    // Test des visites
+    print('\n📍 TEST ENDPOINT VISITES:');
+    try {
+      final response = await http.get(
+        Uri.parse(AppApi.getMyVisitesUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      
+      print('   URL: ${AppApi.getMyVisitesUrl}');
+      print('   Status: ${response.statusCode}');
+      print('   Body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('   ✅ Données reçues: ${data.length} visites');
+        
+        if (data.isNotEmpty) {
+          print('   📋 Premier élément: ${data.first}');
+        }
+      }
+    } catch (e) {
+      print('   ❌ Erreur: $e');
+    }
+    
+    // Test des circuits
+    print('\n🛣️ TEST ENDPOINT CIRCUITS:');
+    try {
+      final response = await http.get(
+        Uri.parse(AppApi.getMyCircuitsUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      
+      print('   URL: ${AppApi.getMyCircuitsUrl}');
+      print('   Status: ${response.statusCode}');
+      print('   Body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('   ✅ Données reçues: ${data.length} circuits');
+        
+        if (data.isNotEmpty) {
+          print('   📋 Premier élément: ${data.first}');
+        }
+      }
+    } catch (e) {
+      print('   ❌ Erreur: $e');
+    }
+    
+    // Test des endpoints généraux
+    print('\n🌐 TEST ENDPOINTS GÉNÉRAUX:');
+    
+    // Test visites générales
+    try {
+      final response = await http.get(
+        Uri.parse(AppApi.getVisitesUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      
+      print('   URL Visites générales: ${AppApi.getVisitesUrl}');
+      print('   Status: ${response.statusCode}');
+      print('   Body: ${response.body}');
+    } catch (e) {
+      print('   ❌ Erreur visites générales: $e');
+    }
+    
+    // Test circuits généraux
+    try {
+      final response = await http.get(
+        Uri.parse(AppApi.getCircuitsUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      
+      print('   URL Circuits généraux: ${AppApi.getCircuitsUrl}');
+      print('   Status: ${response.statusCode}');
+      print('   Body: ${response.body}');
+    } catch (e) {
+      print('   ❌ Erreur circuits généraux: $e');
     }
   }
 } 

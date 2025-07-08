@@ -1,4 +1,4 @@
-import 'client_model.dart';
+import 'package:pfe/features/clients/models/client_model.dart';
 
 class VisiteModel {
   final int id;
@@ -16,9 +16,10 @@ class VisiteModel {
   factory VisiteModel.fromJson(Map<String, dynamic> json) {
     return VisiteModel(
       id: json['id'],
-      date: DateTime.parse(json['date']),
+      // Important: convertir en local pour comparaison
+      date: DateTime.parse(json['date']).toLocal(),
       client: ClientModel.fromJson(json['client']),
       user: json['user'],
     );
   }
-} 
+}

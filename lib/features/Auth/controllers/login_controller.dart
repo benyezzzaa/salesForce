@@ -3,6 +3,8 @@ import 'package:pfe/core/routes/app_routes.dart';
 import 'package:pfe/core/utils/app_api.dart';
 import 'package:pfe/core/utils/app_services.dart';
 import 'package:pfe/core/utils/storage_services.dart';
+import 'package:pfe/features/home/controller/commercial_controller.dart';
+import 'package:pfe/core/widgets/app_main.dart';
 
 class LoginController extends GetxController {
   var email = ''.obs;
@@ -34,15 +36,16 @@ class LoginController extends GetxController {
 
         if (token != null && token.isNotEmpty && userData != null) {
           // Enregistrement du token
-          StorageService.saveToken(token);
+          await StorageService.saveToken(token);
 
           // Enregistrement des données utilisateur
-          StorageService.saveUser(userData);
+          await StorageService.saveUser(userData);
+
+          // Supprimer tous les controllers pour forcer une reconstruction propre
+          Get.deleteAll(force: true);
 
           print('Token and user data saved. Navigating to home page.');
-          Future.delayed(Duration.zero, () {
-          Get.offAllNamed(AppRoutes.bottomNavWrapper);
-});
+          Get.offAll(() => BottomNavWrapper(initialIndex: 0));
 
         } else {
           Get.snackbar('Login Error', 'Missing token or user data.');

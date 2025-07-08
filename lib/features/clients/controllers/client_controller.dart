@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:pfe/core/utils/app_services.dart';
 import 'package:pfe/core/utils/app_api.dart';
 import 'package:pfe/core/utils/storage_services.dart';
-import 'package:pfe/features/visite/models/client_model.dart';
+import 'package:pfe/features/clients/models/client_model.dart';
 // 👈 AJOUT ICI
 
 class ClientController extends GetxController {
@@ -60,20 +60,31 @@ class ClientController extends GetxController {
   }
 
   /// ✅ Activer / désactiver un client
-  Future<void> toggleClientStatus(int id, bool newStatus) async {
+  void toggleClientStatus(int clientId, bool value) async {
     try {
       final token = StorageService.getToken(); // ✅ ICI la correction
 
       final response = await dio.put(
-        'http://localhost:4000/client/$id/status',
-        data: {"isActive": newStatus},
+        'http://localhost:4000/client/$clientId/status',
+        data: {"isActive": value},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
-      final index = clients.indexWhere((c) => c.id == id);
+      // Remplacer l'affectation directe par une nouvelle instance
+      final index = clients.indexWhere((c) => c.id == clientId);
       if (index != -1) {
-        clients[index].isActive = newStatus;
-        clients.refresh();
+        final oldClient = clients[index];
+        clients[index] = ClientModel(
+          id: oldClient.id,
+          nom: oldClient.nom,
+          prenom: oldClient.prenom,
+          email: oldClient.email,
+          telephone: oldClient.telephone,
+          adresse: oldClient.adresse,
+          isActive: value,
+          latitude: oldClient.latitude,
+          longitude: oldClient.longitude,
+        );
       }
 
       Get.snackbar("Succès", "Statut du client mis à jour");

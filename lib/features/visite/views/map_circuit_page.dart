@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/circuit_model.dart';
-import '../models/client_model.dart';
+import 'package:pfe/features/clients/models/client_model.dart';
 
 class MapCircuitPage extends StatefulWidget {
   const MapCircuitPage({super.key});

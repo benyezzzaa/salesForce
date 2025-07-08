@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pfe/features/clients/controllers/client_controller.dart';
+import 'package:pfe/features/clients/controllers/add_client_controller.dart';
+import 'package:pfe/features/clients/widgets/fiscal_textfield_with_camera.dart';
 
 class AddClientPage extends StatefulWidget {
   const AddClientPage({super.key});
@@ -17,9 +19,10 @@ class _AddClientPageState extends State<AddClientPage> {
   final _emailController = TextEditingController();
   final _telephoneController = TextEditingController();
   final _adresseController = TextEditingController();
-  final _codeFiscaleController = TextEditingController(); // ✅ Nouveau champ
 
   final ClientController clientController = Get.find<ClientController>();
+  final AddClientController addClientController = Get.put(AddClientController());
+
   GoogleMapController? mapController;
   LatLng? selectedLocation;
   Set<Marker> markers = {};
@@ -31,8 +34,8 @@ class _AddClientPageState extends State<AddClientPage> {
     _emailController.dispose();
     _telephoneController.dispose();
     _adresseController.dispose();
-    _codeFiscaleController.dispose(); // ✅ Dispose ici aussi
     mapController?.dispose();
+    addClientController.dispose();
     super.dispose();
   }
 
@@ -55,6 +58,7 @@ class _AddClientPageState extends State<AddClientPage> {
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
+
     if (selectedLocation == null) {
       Get.snackbar(
         'Erreur',
@@ -74,7 +78,7 @@ class _AddClientPageState extends State<AddClientPage> {
         telephone: _telephoneController.text,
         latitude: selectedLocation!.latitude,
         longitude: selectedLocation!.longitude,
-        codeFiscale: _codeFiscaleController.text, // ✅ Passer ici
+        codeFiscale: addClientController.fiscalNumberController.text,
       );
 
       if (client != null) {
@@ -101,7 +105,7 @@ class _AddClientPageState extends State<AddClientPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ajouter un client'),
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: Colors.white,
       ),
       body: Form(
         key: _formKey,
@@ -154,27 +158,10 @@ class _AddClientPageState extends State<AddClientPage> {
             ),
             const SizedBox(height: 16),
 
-            // ✅ Champ Code Fiscal
-            TextFormField(
-              controller: _codeFiscaleController,
-              decoration: const InputDecoration(
-                labelText: 'Code fiscal *',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              maxLength: 13,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Code fiscal requis';
-                }
-                if (!RegExp(r'^\d{13}$').hasMatch(value)) {
-                  return 'Le code fiscal doit contenir exactement 13 chiffres';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
+            /// ✅ OCR Fiscal Scanner
+            FiscalTextFieldWithCamera(controller: addClientController),
 
+            const SizedBox(height: 16),
             const Text(
               'Sélectionnez la position sur la carte *',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

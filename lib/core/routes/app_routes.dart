@@ -13,6 +13,7 @@ import 'package:pfe/features/profile/views/profile_page.dart';
 import 'package:pfe/features/reclamation/reclamation_form_page.dart';
 import 'package:pfe/features/reclamation/reclamation_home_page.dart';
 import 'package:pfe/features/reclamation/reclamations_page.dart';
+import 'package:pfe/features/visite/views/create_visite_multi_page.dart';
 import 'package:pfe/features/visite/views/create_visite_page.dart';
 import 'package:pfe/features/visite/views/map_circuit_page.dart';
 import 'package:pfe/features/visite/views/all_visites_map_page.dart';
@@ -56,6 +57,7 @@ class AppPages {
     GetPage(name: AppRoutes.selectProducts, page: () => const SelectProductsPage()),
     GetPage(name: AppRoutes.selectClient, page: () => SelectClientPage()),
     GetPage(name: AppRoutes.clientsPage, page: () => const ClientsPage()),
+    GetPage(name: AppRoutes.visitesPage, page: () => const CreateVisitePage()),
    
     GetPage(name: AppRoutes.mesReclamations, page: () => MesReclamationsPage()),
    GetPage(

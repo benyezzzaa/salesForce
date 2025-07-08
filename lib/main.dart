@@ -4,89 +4,84 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pfe/core/routes/app_routes.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
-   await Geolocator.requestPermission();
-
-
-  
-
+  await Geolocator.requestPermission();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // Define a light color scheme
+  // Define a modern light color scheme with gradients
   final lightColorScheme = const ColorScheme(
     brightness: Brightness.light,
-    primary: Color(0xFF3F51B5), // A shade of Indigo
+    primary: Color(0xFF667eea), // Modern blue
     onPrimary: Colors.white,
-    primaryContainer: Color(0xFFC5CAE9),
-    onPrimaryContainer: Color(0xFF1A237E),
-    secondary: Color(0xFF607D8B), // Blue Grey
+    primaryContainer: Color(0xFFe0e7ff),
+    onPrimaryContainer: Color(0xFF1e293b),
+    secondary: Color(0xFF764ba2), // Purple
     onSecondary: Colors.white,
-    secondaryContainer: Color(0xFFCFD8DC),
-    onSecondaryContainer: Color(0xFF263238),
-    tertiary: Color(0xFF009688), // Teal
+    secondaryContainer: Color(0xFFf3e8ff),
+    onSecondaryContainer: Color(0xFF581c87),
+    tertiary: Color(0xFFf59e0b), // Amber
     onTertiary: Colors.white,
-    tertiaryContainer: Color(0xFFA7FFEB),
-    onTertiaryContainer: Color(0xFF004D40),
-    error: Color(0xFFB00020), // Red for errors
+    tertiaryContainer: Color(0xFFfef3c7),
+    onTertiaryContainer: Color(0xFF92400e),
+    error: Color(0xFFef4444), // Red
     onError: Colors.white,
-    errorContainer: Color(0xFFFEEAE6),
-    onErrorContainer: Color(0xFF410E0B),
-    outline: Color(0xFF757575), // Grey
-    background: Color(0xFFF5F5F5), // Light Grey Background
-    onBackground: Color(0xFF212121), // Dark Grey Text
-    surface: Color(0xFFFFFFFF), // White Surface
-    onSurface: Color(0xFF212121), // Dark Grey Text
-    surfaceVariant: Color(0xFFEEEEEE), // Lighter Grey Surface Variant
-    onSurfaceVariant: Color(0xFF424242), // Medium Grey Text
-    inverseSurface: Color(0xFF303030), // Dark Grey Inverse Surface
-    onInverseSurface: Color(0xFFFAFAFA), // White Inverse Surface Text
-    inversePrimary: Color(0xFF9FA8DA), // Lighter Indigo Inverse Primary
-    shadow: Color(0xFF000000), // Black Shadow
-    surfaceTint: Color(0xFF3F51B5),
-    outlineVariant: Color(0xFFBDBDBD), // Light Grey Outline Variant
-    scrim: Color(0xFF000000), // Black Scrim
+    errorContainer: Color(0xFFfef2f2),
+    onErrorContainer: Color(0xFF991b1b),
+    outline: Color(0xFF6b7280),
+    background: Color(0xFFf8fafc), // Light gray background
+    onBackground: Color(0xFF1e293b),
+    surface: Color(0xFFFFFFFF),
+    onSurface: Color(0xFF1e293b),
+    surfaceVariant: Color(0xFFf1f5f9),
+    onSurfaceVariant: Color(0xFF475569),
+    inverseSurface: Color(0xFF334155),
+    onInverseSurface: Color(0xFFf8fafc),
+    inversePrimary: Color(0xFFa5b4fc),
+    shadow: Color(0xFF000000),
+    surfaceTint: Color(0xFF667eea),
+    outlineVariant: Color(0xFFcbd5e1),
+    scrim: Color(0xFF000000),
   );
 
-  // Define a dark color scheme
+  // Define a modern dark color scheme with gradients
   final darkColorScheme = const ColorScheme(
     brightness: Brightness.dark,
-    primary: Color(0xFF7986CB), // Lighter Indigo
-    onPrimary: Colors.black,
-    primaryContainer: Color(0xFF303F9F),
-    onPrimaryContainer: Color(0xFFC5CAE9),
-    secondary: Color(0xFF90A4AE), // Lighter Blue Grey
-    onSecondary: Colors.black,
-    secondaryContainer: Color(0xFF455A64),
-    onSecondaryContainer: Color(0xFFCFD8DC),
-    tertiary: Color(0xFF4DB6AC), // Lighter Teal
-    onTertiary: Colors.black,
-    tertiaryContainer: Color(0xFF00796B),
-    onTertiaryContainer: Color(0xFFA7FFEB),
-    error: Color(0xFFCF6679), // Light Red for errors
-    onError: Colors.black,
-    errorContainer: Color(0xFFB00020),
-    onErrorContainer: Color(0xFFFEEAE6),
-    outline: Color(0xFF9E9E9E), // Grey
-    background: Color(0xFF121212), // Dark Background
-    onBackground: Color(0xFFE0E0E0), // Light Grey Text
-    surface: Color(0xFF1E1E1E), // Dark Surface
-    onSurface: Color(0xFFE0E0E0), // Light Grey Text
-    surfaceVariant: Color(0xFF424242), // Medium Grey Surface Variant
-    onSurfaceVariant: Color(0xFFBDBDBD), // Light Grey Text
-    inverseSurface: Color(0xFFE0E0E0), // Light Grey Inverse Surface
-    onInverseSurface: Color(0xFF121212), // Dark Inverse Surface Text
-    inversePrimary: Color(0xFF3F51B5), // Indigo Inverse Primary
-    shadow: Color(0xFF000000), // Black Shadow
-    surfaceTint: Color(0xFF7986CB),
-    outlineVariant: Color(0xFF757575), // Grey Outline Variant
-    scrim: Color(0xFF000000), // Black Scrim
+    primary: Color(0xFF818cf8), // Lighter blue
+    onPrimary: Color(0xFF1e293b),
+    primaryContainer: Color(0xFF3730a3),
+    onPrimaryContainer: Color(0xFFe0e7ff),
+    secondary: Color(0xFFa78bfa), // Lighter purple
+    onSecondary: Color(0xFF1e293b),
+    secondaryContainer: Color(0xFF581c87),
+    onSecondaryContainer: Color(0xFFf3e8ff),
+    tertiary: Color(0xFFfbbf24), // Lighter amber
+    onTertiary: Color(0xFF1e293b),
+    tertiaryContainer: Color(0xFF92400e),
+    onTertiaryContainer: Color(0xFFfef3c7),
+    error: Color(0xFFf87171), // Lighter red
+    onError: Color(0xFF1e293b),
+    errorContainer: Color(0xFF991b1b),
+    onErrorContainer: Color(0xFFfef2f2),
+    outline: Color(0xFF9ca3af),
+    background: Color(0xFF0f172a), // Dark blue background
+    onBackground: Color(0xFFf1f5f9),
+    surface: Color(0xFF1e293b),
+    onSurface: Color(0xFFf1f5f9),
+    surfaceVariant: Color(0xFF334155),
+    onSurfaceVariant: Color(0xFFcbd5e1),
+    inverseSurface: Color(0xFFf1f5f9),
+    onInverseSurface: Color(0xFF1e293b),
+    inversePrimary: Color(0xFF667eea),
+    shadow: Color(0xFF000000),
+    surfaceTint: Color(0xFF818cf8),
+    outlineVariant: Color(0xFF475569),
+    scrim: Color(0xFF000000),
   );
 
   @override
@@ -99,11 +94,175 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Roboto',
         useMaterial3: true,
         colorScheme: lightColorScheme,
+        // Global button theme for light mode
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: lightColorScheme.primary,
+            foregroundColor: Colors.white, // White text for buttons
+            elevation: 4,
+            shadowColor: lightColorScheme.primary.withOpacity(0.3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white, // Ensure white text
+            ),
+          ),
+        ),
+        // Text button theme
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: lightColorScheme.primary,
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        // Outlined button theme
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: lightColorScheme.primary,
+            side: BorderSide(color: lightColorScheme.primary),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        // App bar theme
+        appBarTheme: AppBarTheme(
+          backgroundColor: lightColorScheme.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        // Card theme
+        cardTheme: CardTheme(
+          color: lightColorScheme.surface,
+          elevation: 4,
+          shadowColor: Colors.black.withOpacity(0.1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        // Input decoration theme
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: lightColorScheme.surfaceVariant,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: lightColorScheme.outlineVariant),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: lightColorScheme.primary, width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        ),
       ),
       darkTheme: ThemeData(
         fontFamily: 'Roboto',
         useMaterial3: true,
         colorScheme: darkColorScheme,
+        // Global button theme for dark mode
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: darkColorScheme.primary,
+            foregroundColor: darkColorScheme.onPrimary,
+            elevation: 4,
+            shadowColor: darkColorScheme.primary.withOpacity(0.3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            textStyle: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: darkColorScheme.onPrimary,
+            ),
+          ),
+        ),
+        // Text button theme
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: darkColorScheme.primary,
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        // Outlined button theme
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: darkColorScheme.primary,
+            side: BorderSide(color: darkColorScheme.primary),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        // App bar theme
+        appBarTheme: AppBarTheme(
+          backgroundColor: darkColorScheme.primary,
+          foregroundColor: darkColorScheme.onPrimary,
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: darkColorScheme.onPrimary,
+          ),
+        ),
+        // Card theme
+        cardTheme: CardTheme(
+          color: darkColorScheme.surface,
+          elevation: 4,
+          shadowColor: Colors.black.withOpacity(0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        // Input decoration theme
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: darkColorScheme.surfaceVariant,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: darkColorScheme.outlineVariant),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: darkColorScheme.primary, width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        ),
       ),
       themeMode: ThemeMode.system, // Use system theme (light or dark)
     );

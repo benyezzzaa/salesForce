@@ -9,12 +9,15 @@ class ObjectifService {
 
   Future<List<ObjectifModel>> fetchObjectifs() async {
     final token = box.read('token');
+    print('TOKEN UTILISÉ POUR FETCH OBJECTIFS: $token');
 
     try {
       final response = await _dio.get(
         '/objectifs/me/progress',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
+
+      print('RÉPONSE OBJECTIFS: ${response.data}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;

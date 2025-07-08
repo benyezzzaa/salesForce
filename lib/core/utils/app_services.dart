@@ -11,6 +11,8 @@ class ApiService {
     BaseOptions(
       baseUrl: AppApi.baseUrl,
       contentType: 'application/json',
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
     ),
   );
 

@@ -1,4 +1,4 @@
-import 'client_model.dart';
+import 'package:pfe/features/clients/models/client_model.dart';
 
 class CircuitModel {
   final int id;

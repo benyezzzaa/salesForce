@@ -107,6 +107,12 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
           children: [
             AppBar(
               backgroundColor: colorScheme.primary,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: colorScheme.onPrimary),
+                onPressed: () {
+                  Get.offAllNamed('/home');
+                },
+              ),
               title: Text(
                 'Mes Commandes',
                 style: TextStyle(color: colorScheme.onPrimary),

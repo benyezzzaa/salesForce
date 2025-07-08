@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import '../models/client_model.dart';
+import 'package:pfe/features/clients/models/client_model.dart';
 
 class PositionsMapPage extends StatefulWidget {
   const PositionsMapPage({super.key});
@@ -38,6 +38,7 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
     await _getCurrentLocation();
     _addMarkers();
     _createRoute();
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
     });
@@ -49,6 +50,7 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
+          if (!mounted) return;
           setState(() {
             _error = 'Permission de localisation refusée.';
           });
@@ -57,6 +59,7 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
       }
 
       if (permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
         setState(() {
           _error = 'La permission de localisation est refusée de manière permanente.';
         });
@@ -65,6 +68,7 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
 
       currentPosition = await Geolocator.getCurrentPosition();
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = 'Erreur lors de l\'obtention de la position: ${e.toString()}';
       });
@@ -72,7 +76,6 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
   }
 
   void _addMarkers() {
-    // Marqueur pour le commercial connecté
     if (commercial != null && commercial!['latitude'] != null && commercial!['longitude'] != null) {
       markers.add(Marker(
         markerId: const MarkerId('commercial'),
@@ -88,7 +91,6 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
       ));
     }
 
-    // Marqueur pour le client sélectionné
     if (client != null && client!.latitude != null && client!.longitude != null) {
       markers.add(Marker(
         markerId: const MarkerId('client'),
@@ -101,7 +103,6 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
       ));
     }
 
-    // Marqueur pour la position actuelle (si différente du commercial)
     if (currentPosition != null) {
       bool isDifferentFromCommercial = true;
       if (commercial != null && commercial!['latitude'] != null && commercial!['longitude'] != null) {
@@ -113,7 +114,6 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
           commercialLat,
           commercialLng,
         );
-        // Si la distance est inférieure à 100m, considérer que c'est la même position
         isDifferentFromCommercial = distance > 100;
       }
 
@@ -134,7 +134,6 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
   void _createRoute() {
     List<LatLng> routePoints = [];
 
-    // Ajouter la position du commercial
     if (commercial != null && commercial!['latitude'] != null && commercial!['longitude'] != null) {
       routePoints.add(LatLng(
         (commercial!['latitude'] as num).toDouble(),
@@ -142,12 +141,10 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
       ));
     }
 
-    // Ajouter la position du client
     if (client != null && client!.latitude != null && client!.longitude != null) {
       routePoints.add(LatLng(client!.latitude!, client!.longitude!));
     }
 
-    // Créer la route si on a au moins 2 points
     if (routePoints.length >= 2) {
       polylines.add(Polyline(
         polylineId: const PolylineId('route'),
@@ -167,7 +164,6 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
   void _fitBounds() {
     List<LatLng> allPoints = [];
 
-    // Ajouter la position du commercial
     if (commercial != null && commercial!['latitude'] != null && commercial!['longitude'] != null) {
       allPoints.add(LatLng(
         (commercial!['latitude'] as num).toDouble(),
@@ -175,12 +171,10 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
       ));
     }
 
-    // Ajouter la position du client
     if (client != null && client!.latitude != null && client!.longitude != null) {
       allPoints.add(LatLng(client!.latitude!, client!.longitude!));
     }
 
-    // Ajouter la position actuelle si différente
     if (currentPosition != null) {
       bool isDifferentFromCommercial = true;
       if (commercial != null && commercial!['latitude'] != null && commercial!['longitude'] != null) {
@@ -263,7 +257,6 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
       );
     }
 
-    // Calculer la position initiale de la carte
     LatLng initialPosition;
     if (commercial != null && commercial!['latitude'] != null && commercial!['longitude'] != null) {
       initialPosition = LatLng(
@@ -273,7 +266,6 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
     } else if (client != null && client!.latitude != null && client!.longitude != null) {
       initialPosition = LatLng(client!.latitude!, client!.longitude!);
     } else {
-      // Position par défaut (Paris)
       initialPosition = const LatLng(48.8566, 2.3522);
     }
 
@@ -283,15 +275,23 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         elevation: 2,
-        leading: IconButton(
-          icon: const Icon(Icons.home),
-          onPressed: () {
-            Get.offAllNamed('/home');
-          },
-          tooltip: 'Retour à l\'accueil',
-        ),
         actions: [
-          // Bouton pour créer une nouvelle visite
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              Get.defaultDialog(
+                title: "Retour à l'accueil",
+                middleText: "Voulez-vous revenir à la page d'accueil ?",
+                textCancel: "Annuler",
+                textConfirm: "Oui",
+                confirmTextColor: Colors.white,
+                onConfirm: () {
+                  Get.offAllNamed('/bottom-nav-wrapper');
+                },
+              );
+            },
+            tooltip: "Accueil",
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
@@ -299,7 +299,6 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
             },
             tooltip: 'Nouvelle visite',
           ),
-          // Bouton pour voir le circuit complet
           IconButton(
             icon: const Icon(Icons.route),
             onPressed: () {
@@ -309,100 +308,19 @@ class _PositionsMapPageState extends State<PositionsMapPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Informations en haut
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: colorScheme.surfaceContainerLow,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Message de succès
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_circle, color: Colors.green, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Visite créée avec succès !',
-                          style: TextStyle(
-                            color: Colors.green.shade700,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                if (commercial != null) ...[
-                  Row(
-                    children: [
-                      Icon(Icons.person, color: Colors.blue, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Commercial: ${commercial!['nom']} ${commercial!['prenom']}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                if (client != null) ...[
-                  Row(
-                    children: [
-                      Icon(Icons.business, color: Colors.red, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Client: ${client!.fullName}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Adresse: ${client!.adresse}',
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          // Carte
-          Expanded(
-            child: GoogleMap(
-              onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(
-                target: initialPosition,
-                zoom: 12.0,
-              ),
-              markers: markers,
-              polylines: polylines,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
-              zoomControlsEnabled: true,
-              mapToolbarEnabled: true,
-            ),
-          ),
-        ],
+      body: GoogleMap(
+        onMapCreated: _onMapCreated,
+        initialCameraPosition: CameraPosition(
+          target: initialPosition,
+          zoom: 12.0,
+        ),
+        markers: markers,
+        polylines: polylines,
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
+        zoomControlsEnabled: true,
+        mapToolbarEnabled: true,
       ),
     );
   }
-} 
+}
