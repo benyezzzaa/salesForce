@@ -102,10 +102,20 @@ class _AddClientPageState extends State<AddClientPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ajouter un client'),
-        backgroundColor: Colors.white,
+        title: Text('Ajouter un client', style: TextStyle(color: colorScheme.onPrimary)),
+        backgroundColor: colorScheme.primary,
+        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        elevation: 2,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save, color: Colors.white),
+            onPressed: _submitForm,
+            tooltip: 'Sauvegarder le client',
+          ),
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -200,12 +210,17 @@ class _AddClientPageState extends State<AddClientPage> {
             ElevatedButton(
               onPressed: _submitForm,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo.shade600,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 4,
               ),
               child: const Text(
                 'Ajouter le client',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ],

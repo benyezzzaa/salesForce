@@ -53,13 +53,19 @@ final adresseController = TextEditingController();
         backgroundColor: colorScheme.primary,
         iconTheme: IconThemeData(color: colorScheme.onPrimary),
         actions: [
-  IconButton(
-    icon: const Icon(Icons.map),  
-    onPressed: () {
-      Get.to(() => ClientsMapPage());
-    },
-  ),
-],
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.white),
+            onPressed: _openAddClientForm,
+            tooltip: 'Ajouter un client',
+          ),
+          IconButton(
+            icon: const Icon(Icons.map),  
+            onPressed: () {
+              Get.to(() => ClientsMapPage());
+            },
+            tooltip: 'Voir la carte',
+          ),
+        ],
       ),
       body: Column(
         children: [

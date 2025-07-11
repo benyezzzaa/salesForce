@@ -211,6 +211,20 @@ class _SelectClientPageState extends State<SelectClientPage> {
       appBar: AppBar(
         title: const Text("Sélectionner un client"),
         backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.white),
+            onPressed: () {
+              Get.to(() => const AddClientPage())?.then((added) {
+                if (added == true) {
+                  clientController.fetchMesClients();
+                }
+              });
+            },
+            tooltip: 'Ajouter un client',
+          ),
+        ],
       ),
       body: Column(
         children: [

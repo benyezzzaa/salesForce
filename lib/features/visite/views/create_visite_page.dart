@@ -66,6 +66,20 @@ class _CreateVisitePageState extends State<CreateVisitePage> {
         backgroundColor: colorScheme.primary,
         iconTheme: IconThemeData(color: colorScheme.onPrimary),
         elevation: 2,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_add, color: Colors.white),
+            onPressed: () {
+              Get.toNamed('/clients')?.then((added) {
+                if (added == true) {
+                  // Recharger la liste des clients dans le contrôleur
+                  controller.loadData();
+                }
+              });
+            },
+            tooltip: 'Ajouter un client',
+          ),
+        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
