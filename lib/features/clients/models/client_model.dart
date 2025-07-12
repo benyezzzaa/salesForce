@@ -27,7 +27,7 @@ class ClientModel {
       nom: json['nom'],
       prenom: json['prenom'],
       email: json['email'],
-      telephone: json['telephone'],
+      telephone: json['telephone'] ?? json['tel'], // ✅ Priorité à 'telephone' (réponse backend)
       adresse: json['adresse'],
       isActive: json['isActive'] ?? true,
       latitude: (json['latitude'] as num?)?.toDouble(),
@@ -40,7 +40,7 @@ class ClientModel {
       'nom': nom,
       'prenom': prenom,
       'email': email,
-      'telephone': telephone,
+      'telephone': telephone, // ✅ Utilise 'telephone' comme dans la réponse backend
       'adresse': adresse,
       'isActive': isActive,
       'latitude': latitude,

@@ -8,6 +8,7 @@ class CommercialController extends GetxController {
   final ObjectifService _objectifService = ObjectifService();
   final homeData = Rx<HomeModel?>(null);
   final RxInt notificationsCount = 0.obs; // ✅ Nouveau champ observable pour notifications
+  final RxBool isLoading = false.obs; // ✅ Ajout d'un état de chargement
 
   @override
   void onInit() {
@@ -18,8 +19,12 @@ class CommercialController extends GetxController {
 
   Future<void> fetchData() async {
     try {
+      isLoading.value = true;
+      print('🔄 Chargement des objectifs...');
+      
       // Fetch objectives from the new service
       final objectifs = await _objectifService.fetchObjectifs();
+      print('📊 Objectifs récupérés: ${objectifs.length}');
 
       // Replace with actual sales data fetch if available
       final sales = <Map<String, dynamic>>[]; 
@@ -32,9 +37,12 @@ class CommercialController extends GetxController {
       );
 
       homeData.value = homeModel;
+      print('✅ Données du tableau de bord mises à jour');
     } catch (e) {
-      print('Erreur fetchData: $e');
+      print('❌ Erreur fetchData: $e');
       Get.snackbar('Erreur', 'Échec de chargement des données du tableau de bord');
+    } finally {
+      isLoading.value = false;
     }
   }
 

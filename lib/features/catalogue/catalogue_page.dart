@@ -90,6 +90,12 @@ class _CataloguePageState extends State<CataloguePage>
 
     return Scaffold(
       backgroundColor: colorScheme.background,
+      appBar: AppBar(
+        title: const Text('Catalogue Produits', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF3F51B5),
+        foregroundColor: Colors.white,
+        elevation: 2,
+      ),
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -103,20 +109,21 @@ class _CataloguePageState extends State<CataloguePage>
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: colorScheme.surface.withOpacity(0.1),
+                            color: const Color(0xFF3F51B5).withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: CircularProgressIndicator(
-                            color: colorScheme.primary,
+                            color: const Color(0xFF3F51B5),
                             strokeWidth: 3,
                           ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           "Chargement du catalogue...",
-                          style: TextStyle(
-                            color: colorScheme.onSurface.withOpacity(0.8),
+                          style: const TextStyle(
+                            color: Color(0xFF3F51B5),
                             fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -132,12 +139,12 @@ class _CataloguePageState extends State<CataloguePage>
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: colorScheme.surface.withOpacity(0.2),
+                                color: const Color(0xFF3F51B5).withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.shopping_bag,
-                                color: colorScheme.onSurface,
+                                color: Color(0xFF3F51B5),
                                 size: 28,
                               ),
                             ),
@@ -146,19 +153,20 @@ class _CataloguePageState extends State<CataloguePage>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  const Text(
                                     "🛒 Catalogue Produits",
                                     style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
-                                      color: colorScheme.onSurface,
+                                      color: Color(0xFF3F51B5),
                                     ),
                                   ),
                                   Text(
                                     "${displayedProduits.length} produit(s) disponible(s)",
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 14,
-                                      color: colorScheme.onSurface.withOpacity(0.8),
+                                      color: Color(0xFF3F51B5),
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
@@ -173,34 +181,34 @@ class _CataloguePageState extends State<CataloguePage>
                         margin: const EdgeInsets.symmetric(horizontal: 20),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: colorScheme.surface.withOpacity(0.1),
+                          color: const Color(0xFF3F51B5).withOpacity(0.05),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: colorScheme.onSurface.withOpacity(0.2)),
+                          border: Border.all(color: const Color(0xFF3F51B5).withOpacity(0.2)),
                         ),
                         child: Column(
                           children: [
                             // Barre de recherche
                             TextField(
                               onChanged: onSearch,
-                              style: TextStyle(color: colorScheme.onSurface),
+                              style: const TextStyle(color: Color(0xFF3F51B5)),
                               decoration: InputDecoration(
                                 hintText: '🔍 Rechercher un produit...',
-                                hintStyle: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
-                                prefixIcon: Icon(Icons.search, color: colorScheme.onSurface.withOpacity(0.6)),
+                                hintStyle: const TextStyle(color: Color(0xFF3F51B5)),
+                                prefixIcon: const Icon(Icons.search, color: Color(0xFF3F51B5)),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: colorScheme.onSurface.withOpacity(0.3)),
+                                  borderSide: const BorderSide(color: Color(0xFF3F51B5)),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: colorScheme.onSurface.withOpacity(0.3)),
+                                  borderSide: const BorderSide(color: Color(0xFF3F51B5)),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: colorScheme.onSurface),
+                                  borderSide: const BorderSide(color: Color(0xFF3F51B5), width: 2),
                                 ),
                                 filled: true,
-                                fillColor: colorScheme.surface.withOpacity(0.1),
+                                fillColor: const Color(0xFF3F51B5).withOpacity(0.05),
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -212,23 +220,24 @@ class _CataloguePageState extends State<CataloguePage>
                                 children: categories.map((category) => 
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8),
-                                    child: FilterChip(
+                                    child:                                     FilterChip(
                                       label: Text(
                                         category,
                                         style: TextStyle(
                                           color: selectedCategory == category 
-                                            ? colorScheme.onSurface 
-                                            : colorScheme.onSurface.withOpacity(0.8),
+                                            ? Colors.white 
+                                            : const Color(0xFF3F51B5),
+                                          fontWeight: selectedCategory == category ? FontWeight.w600 : FontWeight.w500,
                                         ),
                                       ),
                                       selected: selectedCategory == category,
                                       onSelected: (selected) {
                                         filterByCategory(category);
                                       },
-                                      backgroundColor: colorScheme.surface.withOpacity(0.1),
-                                      selectedColor: colorScheme.onSurface.withOpacity(0.3),
-                                      checkmarkColor: colorScheme.onSurface,
-                                      side: BorderSide(color: colorScheme.onSurface.withOpacity(0.3)),
+                                      backgroundColor: const Color(0xFF3F51B5).withOpacity(0.1),
+                                      selectedColor: const Color(0xFF3F51B5),
+                                      checkmarkColor: Colors.white,
+                                      side: const BorderSide(color: Color(0xFF3F51B5)),
                                     ),
                                   ),
                                 ).toList(),
@@ -247,33 +256,34 @@ class _CataloguePageState extends State<CataloguePage>
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(24),
-                                      decoration: BoxDecoration(
-                                        color: colorScheme.surface.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Icon(
-                                        Icons.inbox_outlined,
-                                        size: 64,
-                                        color: colorScheme.onSurface.withOpacity(0.6),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      "Aucun produit trouvé",
-                                      style: TextStyle(
-                                        color: colorScheme.onSurface.withOpacity(0.8),
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
+                                                                    Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF3F51B5).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Icon(
+                                    Icons.inbox_outlined,
+                                    size: 64,
+                                    color: Color(0xFF3F51B5),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  "Aucun produit trouvé",
+                                  style: TextStyle(
+                                    color: Color(0xFF3F51B5),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                     const SizedBox(height: 8),
-                                    Text(
+                                    const Text(
                                       "Aucun produit ne correspond à vos critères",
                                       style: TextStyle(
-                                        color: colorScheme.onSurface.withOpacity(0.6),
+                                        color: Color(0xFF3F51B5),
                                         fontSize: 14,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ],
@@ -292,19 +302,12 @@ class _CataloguePageState extends State<CataloguePage>
                                   final p = displayedProduits[index];
                                   return Container(
                                     decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          colorScheme.surface.withOpacity(0.15),
-                                          colorScheme.surface.withOpacity(0.05),
-                                        ],
-                                      ),
+                                      color: Colors.white,
                                       borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(color: colorScheme.onSurface.withOpacity(0.2)),
+                                      border: Border.all(color: const Color(0xFF3F51B5).withOpacity(0.2)),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
+                                          color: Colors.grey.withOpacity(0.1),
                                           blurRadius: 10,
                                           offset: const Offset(0, 4),
                                         ),
@@ -331,23 +334,23 @@ class _CataloguePageState extends State<CataloguePage>
                                                           width: double.infinity,
                                                           fit: BoxFit.cover,
                                                           errorBuilder: (context, error, stackTrace) => Container(
-                                                            color: colorScheme.surface.withOpacity(0.1),
-                                                            child: Icon(Icons.error, size: 40, color: colorScheme.onSurface.withOpacity(0.6)),
+                                                            color: Colors.white.withOpacity(0.2),
+                                                            child: const Icon(Icons.error, size: 40, color: Colors.white),
                                                           ),
                                                         )
                                                       : Container(
-                                                          color: colorScheme.surface.withOpacity(0.1),
-                                                          child: Icon(Icons.image_not_supported, size: 40, color: colorScheme.onSurface.withOpacity(0.6)),
+                                                          color: Colors.white.withOpacity(0.2),
+                                                          child: const Icon(Icons.image_not_supported, size: 40, color: Colors.white),
                                                         ),
                                                 ),
                                               ),
                                               const SizedBox(height: 12),
                                               Text(
                                                 p['nom'],
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                   fontWeight: FontWeight.bold, 
                                                   fontSize: 16,
-                                                  color: colorScheme.onSurface,
+                                                  color: Color(0xFF3F51B5),
                                                 ),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
@@ -356,16 +359,16 @@ class _CataloguePageState extends State<CataloguePage>
                                               Text(
                                                 p['unite'] != null ? p['unite']['nom'] : '',
                                                 style: TextStyle(
-                                                  color: colorScheme.onSurface.withOpacity(0.7), 
+                                                  color: Colors.grey[600], 
                                                   fontSize: 13,
                                                 ),
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
                                                 "${p['prix']} €",
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                   fontWeight: FontWeight.bold, 
-                                                  color: colorScheme.onSurface,
+                                                  color: Color(0xFF3F51B5),
                                                   fontSize: 16,
                                                 ),
                                               ),

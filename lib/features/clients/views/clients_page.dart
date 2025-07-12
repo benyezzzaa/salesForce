@@ -49,9 +49,9 @@ final adresseController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("👥 Mes Clients", style: TextStyle(color: colorScheme.onPrimary)),
-        backgroundColor: colorScheme.primary,
-        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        title: Text("👥 Mes Clients", style: const TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF3F51B5),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(Icons.add, color: Colors.white),

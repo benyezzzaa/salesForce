@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:pfe/core/widgets/app_main.dart';
 import 'package:pfe/features/Auth/screens/login_page.dart';
+import 'package:pfe/features/Auth/screens/forgot_password_page.dart';
 import 'package:pfe/features/catalogue/catalogue_page.dart';
 import 'package:pfe/features/clients/views/clients_page.dart';
 import 'package:pfe/features/commande/views/screens/commercial_orders_page.dart';
@@ -24,6 +25,7 @@ import 'package:pfe/features/notifications/notifications_page.dart';
 
 class AppRoutes {
   static const String loginPage = '/login';
+  static const String forgotPasswordPage = '/forgot-password';
   static const String homePage = '/home';
   static const String commandesPage = '/commandes';
   static const String selectProducts = '/select-products';
@@ -52,6 +54,7 @@ class AppRoutes {
 class AppPages {
   static final routes = [
     GetPage(name: AppRoutes.loginPage, page: () => const LoginPage()),
+    GetPage(name: AppRoutes.forgotPasswordPage, page: () => const ForgotPasswordPage()),
     GetPage(name: AppRoutes.homePage, page: () => const CommercialHomePage()),
     GetPage(name: AppRoutes.commandesPage, page: () => CommercialOrdersPage()),
     GetPage(name: AppRoutes.selectProducts, page: () => const SelectProductsPage()),

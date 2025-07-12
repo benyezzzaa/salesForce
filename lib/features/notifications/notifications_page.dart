@@ -13,9 +13,9 @@ class NotificationsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Promotions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+        title: const Text('Promotions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white)),
         centerTitle: true,
-        backgroundColor: colorScheme.primary,
+        backgroundColor: const Color(0xFF3F51B5),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {

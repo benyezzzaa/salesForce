@@ -49,9 +49,9 @@ class _ProfilePageState extends State<ProfilePage>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        title: const Text('Profil', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF3F51B5),
+        foregroundColor: Colors.white,
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,

@@ -209,9 +209,9 @@ class _SelectClientPageState extends State<SelectClientPage> {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Sélectionner un client"),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        title: const Text("Sélectionner un client", style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF3F51B5),
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.add, color: Colors.white),

@@ -18,7 +18,7 @@ class CommandeDetailsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF1F5F9),
       appBar: AppBar(
-        backgroundColor: Colors.indigo.shade500,
+        backgroundColor: const Color(0xFF3F51B5),
         title: Text('Commande ${commande.numeroCommande}', style: const TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
       ),

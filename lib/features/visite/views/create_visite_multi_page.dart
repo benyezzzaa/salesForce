@@ -142,7 +142,11 @@ class _CreateVisiteMultiPageState extends State<CreateVisiteMultiPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Ajouter des visites')),
+      appBar: AppBar(
+        title: const Text('Ajouter des visites', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF3F51B5),
+        foregroundColor: Colors.white,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

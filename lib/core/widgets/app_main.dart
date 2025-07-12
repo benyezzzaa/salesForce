@@ -52,20 +52,17 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       body: _getPage(_selectedIndex),
       bottomNavigationBar: Container(
         height: 90,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
+              blurRadius: 15,
+              offset: const Offset(0, -3),
             ),
           ],
         ),
@@ -85,23 +82,21 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
   }
 
   Widget _buildBottomIcon(IconData icon, String label, int index) {
-    final colorScheme = Theme.of(context).colorScheme;
     final bool isSelected = _selectedIndex == index;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () => _onItemTapped(index),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? const Color(0xFF3F51B5) : Colors.transparent,
+          borderRadius: BorderRadius.circular(25),
           boxShadow: isSelected 
             ? [
                 BoxShadow(
-                  color: colorScheme.primary.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  color: const Color(0xFF3F51B5).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
               ]
             : null,
@@ -112,20 +107,20 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
           children: [
             Icon(
               icon,
-              size: 24,
+              size: 26,
               color: isSelected 
-                ? colorScheme.onPrimary 
-                : colorScheme.onSurface.withOpacity(0.7),
+                ? Colors.white 
+                : Colors.grey.shade600,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected 
-                  ? colorScheme.onPrimary 
-                  : colorScheme.onSurface.withOpacity(0.7),
+                  ? Colors.white 
+                  : Colors.grey.shade600,
               ),
             ),
           ],

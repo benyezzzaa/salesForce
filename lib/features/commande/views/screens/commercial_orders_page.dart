@@ -106,21 +106,21 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
         child: Column(
           children: [
             AppBar(
-              backgroundColor: colorScheme.primary,
+              backgroundColor: const Color(0xFF3F51B5),
               leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: colorScheme.onPrimary),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () {
-                  Get.offAllNamed('/home');
+                  Get.offAllNamed('/bottom-nav-wrapper');
                 },
               ),
-              title: Text(
+              title: const Text(
                 'Mes Commandes',
-                style: TextStyle(color: colorScheme.onPrimary),
+                style: TextStyle(color: Colors.white),
               ),
               actions: [
                 PopupMenuButton<String>(
                   onSelected: (value) => setState(() => sortMode = value),
-                  icon: Icon(Icons.sort, color: colorScheme.onPrimary),
+                  icon: const Icon(Icons.sort, color: Colors.white),
                   itemBuilder: (context) => [
                     PopupMenuItem(
                       value: 'date',
@@ -135,15 +135,15 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
                   ],
                 ),
                 IconButton(
-                  icon: Icon(Icons.add_circle_outline,
-                      size: 28, color: colorScheme.onPrimary),
+                  icon: const Icon(Icons.add_circle_outline,
+                      size: 28, color: Colors.white),
                   tooltip: 'Nouvelle commande',
                   onPressed: () {
                     Get.toNamed('/select-products');
                   },
                 )
               ],
-              iconTheme: IconThemeData(color: colorScheme.onPrimary),
+              iconTheme: const IconThemeData(color: Colors.white),
               elevation: 2,
             ),
             Padding(

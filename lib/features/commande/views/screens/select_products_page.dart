@@ -134,9 +134,9 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
     return Scaffold(
       backgroundColor: colorScheme.background,
       appBar: AppBar(
-        backgroundColor: colorScheme.primary,
-        title: Text("Sélection des produits", style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.bold)),
-        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        backgroundColor: const Color(0xFF3F51B5),
+        title: const Text("Sélection des produits", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        iconTheme: const IconThemeData(color: Colors.white),
         elevation: 2,
         actions: [
           Stack(

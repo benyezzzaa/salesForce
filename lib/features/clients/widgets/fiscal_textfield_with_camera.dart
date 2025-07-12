@@ -12,7 +12,7 @@ class FiscalTextFieldWithCamera extends StatelessWidget {
     return Obx(() => TextFormField(
           controller: controller.fiscalNumberController,
           decoration: InputDecoration(
-            labelText: 'Numéro fiscal',
+            labelText: 'Numéro fiscal *',
             border: const OutlineInputBorder(),
             suffixIcon: controller.isScanning.value
                 ? const Padding(

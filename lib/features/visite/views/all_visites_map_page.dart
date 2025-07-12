@@ -527,15 +527,15 @@ class _AllVisitesMapPageState extends State<AllVisitesMapPage> {
     final clientsWithCoords = controller.getClientsWithCoordinatesForDate(controller.selectedDate.value);
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-          tooltip: 'Retour',
-        ),
-        title: const Text('Carte des Visites'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+              appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+            tooltip: 'Retour',
+          ),
+          title: const Text('Carte des Visites', style: TextStyle(color: Colors.white)),
+          backgroundColor: const Color(0xFF3F51B5),
+          foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),

@@ -26,10 +26,41 @@ class ApiService {
 
   /// POST
   Future<Response> post(String endpoint, Map<String, dynamic> data, {bool useToken = true}) async {
-    if (useToken) {
-      _dio.options.headers['Authorization'] = 'Bearer ${_storage.read('token')}';
+    try {
+      print('📡 ApiService.post - URL: $endpoint');
+      print('📡 ApiService.post - Data: $data');
+      print('📡 ApiService.post - UseToken: $useToken');
+      
+      if (useToken) {
+        final token = _storage.read('token');
+        if (token != null) {
+          _dio.options.headers['Authorization'] = 'Bearer $token';
+          print('📡 ApiService.post - Token ajouté');
+        } else {
+          print('📡 ApiService.post - Aucun token trouvé');
+        }
+      }
+      
+      final response = await _dio.post(endpoint, data: data);
+      print('📡 ApiService.post - Réponse reçue: ${response.statusCode}');
+      return response;
+    } catch (e) {
+      print('❌ Erreur dans ApiService.post: $e');
+      
+      // Log détaillé pour les erreurs Dio
+      if (e.toString().contains('DioException')) {
+        print('❌ Type d\'erreur: DioException');
+        if (e.toString().contains('status code of 400')) {
+          print('❌ Erreur 400 - Bad Request');
+        } else if (e.toString().contains('status code of 404')) {
+          print('❌ Erreur 404 - Not Found');
+        } else if (e.toString().contains('status code of 500')) {
+          print('❌ Erreur 500 - Internal Server Error');
+        }
+      }
+      
+      rethrow;
     }
-    return await _dio.post(endpoint, data: data);
   }
 
   /// PATCH

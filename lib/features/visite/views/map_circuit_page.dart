@@ -296,9 +296,9 @@ class _MapCircuitPageState extends State<MapCircuitPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Circuit de visite'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        title: const Text('Circuit de visite', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF3F51B5),
+        foregroundColor: Colors.white,
         elevation: 2,
         actions: [
           IconButton(

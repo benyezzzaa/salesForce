@@ -62,9 +62,9 @@ class _CircuitViewerPageState extends State<CircuitViewerPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mes Circuits'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        title: const Text('Mes Circuits', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF3F51B5),
+        foregroundColor: Colors.white,
         elevation: 2,
         actions: [
           IconButton(

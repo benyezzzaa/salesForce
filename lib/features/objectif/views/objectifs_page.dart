@@ -14,8 +14,8 @@ class ObjectifsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Mes Objectifs"),
-        backgroundColor: Colors.indigo,
+        title: const Text("Mes Objectifs", style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF3F51B5),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {

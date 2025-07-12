@@ -2,7 +2,7 @@
 
 class AppApi {
   // Base URL
-  static const String baseUrl = "http://192.168.1.9:4000";
+  static const String baseUrl = "http://192.168.1.3:4000";
   
   static const String loginUrl = "$baseUrl/auth/login";
   static const String getCommandeUrl = "$baseUrl/commandes";
@@ -12,6 +12,7 @@ class AppApi {
   static const String getPromotionsUrl = "$baseUrl/promotions";
   static const String getClientsOfCurrentCommercial = "$baseUrl/client/mes-clients";
   static const String mesObjectifs = "$baseUrl/objectifs/me/progress";
+  static const String forgotPasswordUrl = "$baseUrl/auth/forgot-password";
   static const String resetPasswordUrl = "$baseUrl/auth/reset-password";
   
   // Visites et Circuits - Endpoints spécifiques au commercial connecté

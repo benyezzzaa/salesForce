@@ -13,9 +13,9 @@ class ReclamationHomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: colorScheme.background,
       appBar: AppBar(
-        title: Text("Réclamations", style: TextStyle(color: colorScheme.onPrimary)),
-        backgroundColor: colorScheme.primary,
-        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        title: const Text("Réclamations", style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF3F51B5),
+        iconTheme: const IconThemeData(color: Colors.white),
         elevation: 2,
       ),
       body: Padding(

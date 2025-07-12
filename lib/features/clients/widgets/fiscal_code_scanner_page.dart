@@ -87,8 +87,8 @@ class _FiscalCodeScannerPageState extends State<FiscalCodeScannerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scanner le numéro fiscal'),
-        backgroundColor: Colors.black87,
+        title: const Text('Scanner le numéro fiscal', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF3F51B5),
         foregroundColor: Colors.white,
       ),
       body: Container(

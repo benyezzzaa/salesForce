@@ -100,10 +100,12 @@
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Get.toNamed(AppRoutes.forgotPasswordPage);
+                            },
                             child: const Text(
                               "Mot de passe oublié ?",
-                              style: TextStyle(color: Colors.indigo),
+                              style: TextStyle(color: Color(0xFF3F51B5)),
                             ),
                           ),
                         ),

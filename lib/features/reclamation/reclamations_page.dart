@@ -17,9 +17,9 @@ class MesReclamationsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: colorScheme.background, // Use background color
       appBar: AppBar(
-        title: Text('Mes réclamations', style: TextStyle(color: colorScheme.onPrimary)), // Use onPrimary
-        backgroundColor: colorScheme.primary, // Use primary color
-        iconTheme: IconThemeData(color: colorScheme.onPrimary), // Use onPrimary for back button
+        title: const Text('Mes réclamations', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF3F51B5),
+        iconTheme: const IconThemeData(color: Colors.white),
         elevation: 2, // Consistent elevation
       ),
 

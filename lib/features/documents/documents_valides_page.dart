@@ -84,14 +84,14 @@ class _DocumentsValidesPageState extends State<DocumentsValidesPage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF3F51B5),
         elevation: 1,
-        title: Text(
+        title: const Text(
           "Commandes validées",
-          style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.blue.shade900),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SafeArea(
         child: Column(
