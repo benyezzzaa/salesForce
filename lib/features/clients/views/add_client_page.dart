@@ -4,6 +4,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pfe/features/clients/controllers/client_controller.dart';
 import 'package:pfe/features/clients/controllers/add_client_controller.dart';
 import 'package:pfe/features/clients/widgets/fiscal_textfield_with_camera.dart';
+import 'package:pfe/features/clients/services/geocoding_service.dart';
+import 'dart:async';
 
 class AddClientPage extends StatefulWidget {
   const AddClientPage({super.key});
@@ -26,6 +28,9 @@ class _AddClientPageState extends State<AddClientPage> {
   GoogleMapController? mapController;
   LatLng? selectedLocation;
   Set<Marker> markers = {};
+  Timer? _debounceTimer;
+  bool _isGeocoding = false;
+  String _formattedAddress = '';
 
   @override
   void dispose() {
@@ -36,6 +41,7 @@ class _AddClientPageState extends State<AddClientPage> {
     _adresseController.dispose();
     mapController?.dispose();
     addClientController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -43,7 +49,7 @@ class _AddClientPageState extends State<AddClientPage> {
     mapController = controller;
   }
 
-  void _onMapTap(LatLng location) {
+  void _onMapTap(LatLng location) async {
     setState(() {
       selectedLocation = location;
       markers = {
@@ -54,6 +60,107 @@ class _AddClientPageState extends State<AddClientPage> {
         ),
       };
     });
+
+    // Obtenir l'adresse à partir des coordonnées
+    final address = await GeocodingService.reverseGeocode(location);
+    if (address != null) {
+      setState(() {
+        _formattedAddress = address;
+      });
+      // Mettre à jour automatiquement le champ adresse
+      _adresseController.text = address;
+    }
+  }
+
+  /// Recherche automatique d'adresse avec debounce
+  void _onAddressChanged(String address) {
+    _debounceTimer?.cancel();
+    
+    if (address.trim().length < 5) {
+      setState(() {
+        _formattedAddress = '';
+        _isGeocoding = false;
+      });
+      return;
+    }
+
+    _debounceTimer = Timer(const Duration(milliseconds: 1500), () {
+      _geocodeAddress(address);
+    });
+  }
+
+  /// Recherche manuelle d'adresse
+  Future<void> _geocodeAddress(String address) async {
+    if (!GeocodingService.isValidAddress(address)) return;
+
+    setState(() {
+      _isGeocoding = true;
+    });
+
+    try {
+      final result = await GeocodingService.geocodeAddress(address);
+      
+      if (result != null) {
+        final lat = result['latitude'];
+        final lon = result['longitude'];
+        final formattedAddress = result['fullAddress'];
+        
+        final location = LatLng(lat, lon);
+        
+        setState(() {
+          selectedLocation = location;
+          _formattedAddress = formattedAddress;
+          markers = {
+            Marker(
+              markerId: const MarkerId('selectedLocation'),
+              position: location,
+              infoWindow: InfoWindow(
+                title: 'Adresse trouvée',
+                snippet: formattedAddress,
+              ),
+            ),
+          };
+        });
+
+        // Mettre à jour automatiquement le champ adresse avec l'adresse formatée
+        _adresseController.text = formattedAddress;
+
+        // Animer la carte vers la nouvelle position
+        if (mapController != null) {
+          await mapController!.animateCamera(
+            CameraUpdate.newLatLngZoom(location, 16),
+          );
+        }
+
+        Get.snackbar(
+          '✅ Adresse trouvée',
+          formattedAddress,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+      } else {
+        Get.snackbar(
+          '❌ Adresse non trouvée',
+          'Veuillez vérifier l\'adresse ou utiliser la carte pour sélectionner manuellement',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 4),
+        );
+      }
+    } catch (e) {
+      print('❌ Erreur de géocodage: $e');
+      Get.snackbar(
+        '❌ Erreur',
+        'Impossible de localiser l\'adresse. Vérifiez votre connexion internet.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      setState(() {
+        _isGeocoding = false;
+      });
+    }
   }
 
   Future<void> _submitForm() async {
@@ -295,11 +402,27 @@ class _AddClientPageState extends State<AddClientPage> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _adresseController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Adresse *',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
+                hintText: 'Ex: 123 Rue de Rivoli, Paris',
+                suffixIcon: _isGeocoding
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : IconButton(
+                        icon: const Icon(Icons.location_on),
+                        tooltip: 'Localiser l\'adresse',
+                        onPressed: () => _geocodeAddress(_adresseController.text),
+                      ),
               ),
               maxLines: 2,
+              onChanged: _onAddressChanged,
               validator: (value) => value?.isEmpty ?? true ? 'L\'adresse est requise' : null,
             ),
             const SizedBox(height: 16),
@@ -308,9 +431,56 @@ class _AddClientPageState extends State<AddClientPage> {
             FiscalTextFieldWithCamera(controller: addClientController),
 
             const SizedBox(height: 16),
+            
+            // Affichage de l'adresse formatée
+            if (_formattedAddress.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _formattedAddress,
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            
+            Row(
+              children: [
+                const Icon(Icons.map, color: Color(0xFF3F51B5)),
+                const SizedBox(width: 8),
+                const Text(
+                  'Position sur la carte *',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                if (_isGeocoding)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
             const Text(
-              'Sélectionnez la position sur la carte *',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              'Cliquez sur la carte pour ajuster la position ou tapez une adresse ci-dessus',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 8),
             Container(
@@ -325,8 +495,8 @@ class _AddClientPageState extends State<AddClientPage> {
                   onMapCreated: _onMapCreated,
                   onTap: _onMapTap,
                   initialCameraPosition: const CameraPosition(
-                    target: LatLng(36.8065, 10.1815), // Tunis
-                    zoom: 12,
+                    target: LatLng(48.8566, 2.3522), // Paris, France
+                    zoom: 6, // Zoom pour voir toute la France
                   ),
                   markers: markers,
                   myLocationEnabled: true,
@@ -337,9 +507,25 @@ class _AddClientPageState extends State<AddClientPage> {
             ),
             if (selectedLocation != null) ...[
               const SizedBox(height: 8),
-              Text(
-                'Position sélectionnée: ${selectedLocation!.latitude.toStringAsFixed(4)}, ${selectedLocation!.longitude.toStringAsFixed(4)}',
-                style: const TextStyle(fontSize: 14),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_on, color: Colors.blue, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Position: ${selectedLocation!.latitude.toStringAsFixed(4)}, ${selectedLocation!.longitude.toStringAsFixed(4)}',
+                        style: const TextStyle(fontSize: 12, color: Colors.blue),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
             const SizedBox(height: 24),

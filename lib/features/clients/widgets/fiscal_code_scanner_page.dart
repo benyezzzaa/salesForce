@@ -56,25 +56,55 @@ class _FiscalCodeScannerPageState extends State<FiscalCodeScannerPage> {
       final inputImage = InputImage.fromFilePath(imagePath);
       final recognizedText = await _textRecognizer.processImage(inputImage);
 
-      // Chercher un numéro fiscal de 13 chiffres
-      final fiscalPattern = RegExp(r'\b\d{13}\b');
+      // Debug: afficher le texte reconnu
+      print('🔍 Texte reconnu par l\'OCR: "${recognizedText.text}"');
+
+      // Chercher un numéro fiscal de 13 chiffres (avec ou sans espaces)
+      // Regex plus flexible pour détecter différents formats
+      final fiscalPattern = RegExp(r'\b\d{1,4}(?:\s*\d{1,4}){12}\b');
       final matches = fiscalPattern.allMatches(recognizedText.text);
 
       if (matches.isNotEmpty) {
-        final fiscalNumber = matches.first.group(0);
-        setState(() {
-          _detectedText = 'Numéro détecté: $fiscalNumber';
-        });
+        String fiscalNumber = matches.first.group(0)!;
+        // Supprimer tous les espaces et caractères non numériques
+        fiscalNumber = fiscalNumber.replaceAll(RegExp(r'[^\d]'), '');
         
-        // Retourner le numéro fiscal après un court délai
-        await Future.delayed(const Duration(milliseconds: 1000));
-        if (mounted) {
-          Navigator.pop(context, fiscalNumber);
+        // Vérifier que le numéro final fait bien 13 chiffres
+        if (fiscalNumber.length == 13 && RegExp(r'^\d{13}$').hasMatch(fiscalNumber)) {
+          setState(() {
+            _detectedText = 'Numéro détecté: $fiscalNumber';
+          });
+          
+          // Retourner le numéro fiscal après un court délai
+          await Future.delayed(const Duration(milliseconds: 1000));
+          if (mounted) {
+            Navigator.pop(context, fiscalNumber);
+          }
+        } else {
+          setState(() {
+            _detectedText = 'Numéro détecté mais invalide (${fiscalNumber.length} chiffres): ${matches.first.group(0)}';
+          });
         }
       } else {
-        setState(() {
-          _detectedText = 'Aucun numéro fiscal de 13 chiffres détecté';
-        });
+        // Essayer une approche plus permissive
+        final allDigits = recognizedText.text.replaceAll(RegExp(r'[^\d]'), '');
+        if (allDigits.length >= 13) {
+          // Prendre les 13 premiers chiffres
+          final potentialFiscal = allDigits.substring(0, 13);
+          setState(() {
+            _detectedText = 'Numéro potentiel détecté: $potentialFiscal (approche alternative)';
+          });
+          
+          // Retourner le numéro fiscal après un court délai
+          await Future.delayed(const Duration(milliseconds: 1000));
+          if (mounted) {
+            Navigator.pop(context, potentialFiscal);
+          }
+        } else {
+          setState(() {
+            _detectedText = 'Aucun numéro fiscal de 13 chiffres détecté. Texte reconnu: "${recognizedText.text}"';
+          });
+        }
       }
     } catch (e) {
       setState(() {
@@ -210,14 +240,27 @@ class _FiscalCodeScannerPageState extends State<FiscalCodeScannerPage> {
                       ),
                     ],
                   ),
-                  child: Text(
-                    _detectedText,
-                    style: const TextStyle(
-                      color: Colors.black87,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
+                  child: Column(
+                    children: [
+                      Text(
+                        _detectedText,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Conseil: Assurez-vous que le numéro fiscal est bien visible et lisible sur la photo',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
             ],

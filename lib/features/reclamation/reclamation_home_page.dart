@@ -43,7 +43,7 @@ class ReclamationHomePage extends StatelessWidget {
                   await controller.fetchMyReclamations();
                   Get.snackbar('Succès', 'Réclamation ajoutée avec succès ✅');
                 }
-              },
+              }, 
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
