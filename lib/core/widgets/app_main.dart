@@ -55,7 +55,7 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
     return Scaffold(
       body: _getPage(_selectedIndex),
       bottomNavigationBar: Container(
-        height: 90,
+        height: 60,
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -87,10 +87,15 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
     return GestureDetector(
       onTap: () => _onItemTapped(index),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
+  width: 80, 
+  height: 60, 
+  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+          decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF3F51B5) : Colors.transparent,
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: const BorderRadius.only(
+    topLeft: Radius.circular(20),
+    topRight: Radius.circular(20),
+  ),
           boxShadow: isSelected 
             ? [
                 BoxShadow(
@@ -107,7 +112,7 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
           children: [
             Icon(
               icon,
-              size: 26,
+              size: 20,
               color: isSelected 
                 ? Colors.white 
                 : Colors.grey.shade600,

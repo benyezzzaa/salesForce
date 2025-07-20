@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import '../models/commande_model.dart';
 import '../services/commande_service.dart';
 import 'package:pfe/features/clients/models/client_model.dart';
+import '../models/promotion_model.dart';
 
 class CommandeController extends GetxController {
   final commandes = <CommandeModel>[].obs;
   final isLoading = false.obs;
   final _service = CommandeService();
   final selectedClient = Rxn<ClientModel>();
+  final Rx<Promotion?> selectedPromotion = Rx<Promotion?>(null);
 
   @override
   void onInit() {
@@ -33,41 +35,52 @@ class CommandeController extends GetxController {
     }
   }
 
-  Future<void> createCommande(int clientId, Map<int, int> cart) async {
-    try {
-      isLoading.value = true;
-
-      final String numeroCommande = 'CMD-${DateTime.now().millisecondsSinceEpoch}';
-
-      final lignesCommande = cart.entries.map((e) => {
-            'produitId': e.key,
-            'quantite': e.value,
-          }).toList();
-
-      await _service.envoyerCommande(
-        numeroCommande: numeroCommande,
-        clientId: clientId,
-        lignesCommande: lignesCommande,
-      );
-
-      // Rafraîchir les données après création
-      fetchCommandes();
-      
-      // Afficher la popup de confirmation
-      await _showSuccessDialog();
-      
-    } catch (e) {
-      print(e);
-      Get.snackbar(
-        'Erreur', 
-        'Impossible de créer la commande',
-        backgroundColor: Get.theme?.colorScheme?.errorContainer,
-        colorText: Get.theme?.colorScheme?.onErrorContainer,
-      );
-    } finally {
-      isLoading.value = false;
+Future<void> createCommande(int clientId, Map<int, int> cart) async {
+  try {
+    isLoading.value = true;
+    
+    final promotion = selectedPromotion.value;
+    // La promotion est totalement optionnelle :
+    // Si aucune promotion n'est sélectionnée, la commande sera créée sans promotion côté backend.
+    print('🔍 CommandeController: Promotion sélectionnée =  [32m${promotion?.titre} [0m (ID: ${promotion?.id})');
+    
+    final payload = {
+      'numeroCommande': 'CMD- [34m${DateTime.now().millisecondsSinceEpoch} [0m',
+      'clientId': clientId,
+      'lignesCommande': cart.entries.map((entry) => {
+        'produitId': entry.key,
+        'quantite': entry.value,
+      }).toList(),
+    };
+    
+    // Ajouter promotionId seulement si une promotion est sélectionnée
+    if (promotion != null) {
+      payload['promotionId'] = promotion.id;
     }
+    // Si aucune promotion, le champ n'est pas envoyé du tout
+    
+    print('Payload envoyé : $payload');
+
+    await _service.envoyerCommande(payload);
+
+    // Rafraîchir les données après création
+    await fetchCommandes();
+    
+    // Afficher la popup de confirmation
+    await _showSuccessDialog();
+    
+  } catch (e) {
+    print("❌ Exception pendant l'envoi de la commande : $e");
+    Get.snackbar(
+      'Erreur', 
+      'Échec de l\'envoi de la commande',
+      backgroundColor: Get.theme?.colorScheme?.errorContainer,
+      colorText: Get.theme?.colorScheme?.onErrorContainer,
+    );
+  } finally {
+    isLoading.value = false;
   }
+}
 
   Future<void> _showSuccessDialog() async {
     await Get.dialog(

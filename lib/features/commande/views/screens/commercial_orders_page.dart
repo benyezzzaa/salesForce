@@ -134,6 +134,7 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
                     ),
                   ],
                 ),
+
                 IconButton(
                   icon: const Icon(Icons.add_circle_outline,
                       size: 28, color: Colors.white),
@@ -355,7 +356,7 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "${cmd.prixTotalTTC.toStringAsFixed(2)} DT",
+                                  "${cmd.prixTotalTTC.toStringAsFixed(2)} €",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -363,7 +364,7 @@ class _CommercialOrdersPageState extends State<CommercialOrdersPage>
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  "HT: ${cmd.prixHorsTaxe.toStringAsFixed(2)} DT",
+                                  "HT: ${cmd.prixHorsTaxe.toStringAsFixed(2)} €",
                                   style: TextStyle(
                                       fontSize: 12,
                                       color: colorScheme.onSurfaceVariant),

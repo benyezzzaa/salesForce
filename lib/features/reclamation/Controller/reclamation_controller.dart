@@ -35,6 +35,7 @@ Future<void> fetchMyReclamations() async {
   try {
     final res = await dio.get('/reclamations/me', options: Options(headers: headers));
     mesReclamations.value = res.data;
+    print(res.data);
   } catch (e) {
     Get.snackbar('Erreur', 'Impossible de récupérer les réclamations');
   } finally {

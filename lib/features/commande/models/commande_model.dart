@@ -10,7 +10,7 @@ class CommandeModel {
   final String? clientEmail;
   final String? clientTelephone;
   final List<LigneCommande> lignes;
-
+  final Map<String, dynamic>? promotion; 
   CommandeModel({
     required this.id,
     required this.numeroCommande,
@@ -23,6 +23,7 @@ class CommandeModel {
     required this.clientNom,
     required this.lignes,
     this.clientAdresse,
+    this.promotion,
   });
 
   factory CommandeModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +35,7 @@ class CommandeModel {
       clientTelephone: json['client']?['telephone'],
       prixTotalTTC: double.tryParse(json['prix_total_ttc'].toString()) ?? 0,
       prixHorsTaxe: double.tryParse(json['prix_hors_taxe'].toString()) ?? 0,
+      promotion: json['promotion'], 
       statut: json['statut'] ?? 'en_attente',
       clientNom: '${json['client']?['prenom'] ?? ''} ${json['client']?['nom'] ?? 'Inconnu'}'.trim(),
       clientAdresse: json['client']?['adresse'] ?? '',

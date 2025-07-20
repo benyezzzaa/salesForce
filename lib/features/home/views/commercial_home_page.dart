@@ -7,6 +7,7 @@ import 'package:pfe/features/notifications/controllers/notification_controller.d
 import 'package:pfe/features/profile/controllers/profile_controller.dart';
 import 'package:pfe/features/reclamation/Controller/reclamation_controller.dart';
 import 'package:pfe/features/objectif/models/objectif_model.dart';
+import 'package:pfe/features/satisfaction/commercial_surveys_page.dart';
 
 class CommercialHomePage extends StatefulWidget {
   const CommercialHomePage({super.key});
@@ -131,17 +132,22 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: Row(
                       children: [
-                        Icon(Icons.lightbulb, color: colorScheme.primary),
-                        const SizedBox(width: 8),
-                        Icon(Icons.campaign, color: colorScheme.error),
+                        Icon(Icons.assignment_turned_in, color: colorScheme.primary),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            '${reclamationController.mesReclamations.length} réclamations en attente 🎯',
-                            style: TextStyle(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
+                          child: GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const CommercialSurveysPage()),
+                            ),
+                            child: Text(
+                              'Enquêtes de satisfaction',
+                              style: TextStyle(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                decoration: TextDecoration.underline,
+                              ),
                             ),
                           ),
                         ),
@@ -168,7 +174,7 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
           ),
           const SizedBox(height: 8),
           Obx(() => Column(
-            children: _buildObjectifsCards(controller, colorScheme),
+            children: _buildObjectifsCards(controller.objectifs, colorScheme),
           )),
           const SizedBox(height: 10),
 
@@ -195,6 +201,16 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
               crossAxisSpacing: 16,
               childAspectRatio: 1.1,
               children: [
+                 _QuickNavCard(
+                  icon: Icons.people,
+                  label: 'Clients',
+                  onTap: () => Get.toNamed('/clients'),
+                ),
+                _QuickNavCard(
+                  icon: Icons.shopping_cart,
+                  label: 'Commandes',
+                  onTap: () => Get.toNamed('/commandes'),
+                ),
                 _QuickNavCard(
                   icon: Icons.assignment,
                   label: 'Réclamations',
@@ -205,16 +221,7 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
                   label: 'Visites',
                   onTap: () => Get.toNamed('/visite/create'),
                 ),
-                _QuickNavCard(
-                  icon: Icons.people,
-                  label: 'Clients',
-                  onTap: () => Get.toNamed('/clients'),
-                ),
-                _QuickNavCard(
-                  icon: Icons.shopping_cart,
-                  label: 'Commandes',
-                  onTap: () => Get.toNamed('/commandes'),
-                ),
+               
               ],
             ),
           ),
@@ -224,32 +231,8 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
     );
   }
 
-  List<Widget> _buildObjectifsCards(CommercialController controller, ColorScheme colorScheme) {
+  List<Widget> _buildObjectifsCards(List<ObjectifModel> objectifs, ColorScheme colorScheme) {
     // Afficher un indicateur de chargement si les données sont en cours de chargement
-    if (controller.isLoading.value) {
-      return [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          child: Center(
-            child: Column(
-              children: [
-                CircularProgressIndicator(color: colorScheme.primary),
-                const SizedBox(height: 12),
-                Text(
-                  "Chargement des objectifs...",
-                  style: TextStyle(
-                    color: colorScheme.onSurface.withOpacity(0.7),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ];
-    }
-
-    final objectifs = controller.objectifs;
     if (objectifs.isEmpty) {
       return [
         Padding(
@@ -286,7 +269,7 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
       ];
     }
     return objectifs.map((obj) {
-      final double realise = obj.realise.toDouble();
+      final double realise = obj.realise?.toDouble() ?? 0.0;
       final double objectif = obj.objectif.toDouble();
       final double percent = (objectif > 0) ? (realise / objectif).clamp(0.0, 1.0) : 0.0;
       final String percentText = objectif > 0 ? ((realise / objectif) * 100).clamp(0.0, 100.0).toStringAsFixed(1) : '0.0';
@@ -446,24 +429,48 @@ class _QuickNavCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _QuickNavCard({required this.icon, required this.label, required this.onTap});
+
+  const _QuickNavCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color.fromARGB(255, 5, 25, 80), // ✅ bordure bleu clair
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1), // ✅ ombre légère
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: colorScheme.primary, size: 36),
             const SizedBox(height: 8),
-            Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.primary)),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.primary,
+              ),
+            ),
           ],
         ),
       ),

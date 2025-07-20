@@ -6,6 +6,9 @@ import 'package:pfe/features/clients/controllers/add_client_controller.dart';
 import 'package:pfe/features/clients/widgets/fiscal_textfield_with_camera.dart';
 import 'package:pfe/features/clients/services/geocoding_service.dart';
 import 'dart:async';
+import 'package:dio/dio.dart'; // Added for Dio
+import 'package:pfe/core/utils/app_api.dart';
+import 'package:pfe/core/utils/storage_services.dart';
 
 class AddClientPage extends StatefulWidget {
   const AddClientPage({super.key});
@@ -31,6 +34,35 @@ class _AddClientPageState extends State<AddClientPage> {
   Timer? _debounceTimer;
   bool _isGeocoding = false;
   String _formattedAddress = '';
+
+  // Ajoute ces variables dans _AddClientPageState
+  List<dynamic> categories = [];
+  dynamic selectedCategorie;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCategories();
+  }
+
+Future<void> fetchCategories() async {
+  print('fetchCategories appelée');
+  try {
+    final token = await StorageService.getToken();
+    final response = await Dio().get(
+      '${AppApi.baseUrl}/categorie-client',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+    print('Réponse catégories: ${response.data}');
+    setState(() {
+      categories = response.data is List ? response.data : response.data['data'];
+    });
+  } catch (e) {
+    print('Erreur lors du chargement des catégories: $e');
+  }
+}
 
   @override
   void dispose() {
@@ -265,6 +297,11 @@ class _AddClientPageState extends State<AddClientPage> {
       return;
     }
 
+    if (selectedCategorie == null) {
+      Get.snackbar('Erreur', 'Veuillez choisir une catégorie', backgroundColor: Colors.red, colorText: Colors.white);
+      return;
+    }
+
     print('✅ Validation réussie, envoi au serveur...');
 
     try {
@@ -277,6 +314,7 @@ class _AddClientPageState extends State<AddClientPage> {
         latitude: selectedLocation!.latitude,
         longitude: selectedLocation!.longitude,
         codeFiscale: addClientController.fiscalNumberController.text,
+        categorieId: selectedCategorie, // Ajoute ce champ
       );
 
       if (client != null) {
@@ -300,6 +338,7 @@ class _AddClientPageState extends State<AddClientPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('build AddClientPage');
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
@@ -429,7 +468,26 @@ class _AddClientPageState extends State<AddClientPage> {
 
             /// ✅ OCR Fiscal Scanner
             FiscalTextFieldWithCamera(controller: addClientController),
-
+            const SizedBox(height: 16),
+            DropdownButtonFormField(
+              value: selectedCategorie,
+              items: categories.map<DropdownMenuItem>((cat) {
+                return DropdownMenuItem(
+                  value: cat['id'],
+                  child: Text(cat['nom']),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedCategorie = value;
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Catégorie de client *',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) => value == null ? 'La catégorie est requise' : null,
+            ),
             const SizedBox(height: 16),
             
             // Affichage de l'adresse formatée

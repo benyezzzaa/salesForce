@@ -120,6 +120,8 @@ final adresseController = TextEditingController();
                         children: [
                           Text(client.email),
                           Text(client.adresse ?? 'Adresse inconnue'),
+                          if (client.categorieNom != null && client.categorieNom!.isNotEmpty)
+                            Text('Catégorie :  {client.categorieNom!}', style: TextStyle(color: Colors.indigo)),
                         ],
                       ),
                       trailing: Row(

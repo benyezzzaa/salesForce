@@ -2,10 +2,13 @@
 
 class AppApi {
   // Base URL
-  static const String baseUrl = "http://192.168.1.2:4000";
+  static const String baseUrl = "http://10.240.159.70:4000";
   
   static const String loginUrl = "$baseUrl/auth/login";
   static const String getCommandeUrl = "$baseUrl/commandes";
+  static const String getCommandesModifieesUrl = "$baseUrl/commandes/modifiees";
+  static const String getCommandesModifieesDetailsUrl = "$baseUrl/commandes/modifiees/details";
+  static const String getNotificationsCountUrl = "$baseUrl/commandes/notifications/count";
   static const String getClientsUrl = "$baseUrl/client";
   static const String createClientUrl = "$baseUrl/client";
   static const String getTodayCircuitUrl = "$baseUrl/circuits/me/today";

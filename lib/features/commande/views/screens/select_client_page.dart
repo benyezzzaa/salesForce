@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pfe/features/clients/controllers/client_controller.dart';
 import 'package:pfe/features/clients/views/add_client_page.dart';
 import 'package:pfe/features/commande/controllers/commande_controller.dart';
+import 'package:dio/dio.dart'; // Pour charger les catégories
 
 class SelectClientPage extends StatefulWidget {
   const SelectClientPage({super.key});
@@ -29,11 +30,29 @@ class _SelectClientPageState extends State<SelectClientPage> {
   Set<Marker> markers = {};
   String searchQuery = '';
 
+  // Ajout pour la catégorie
+  List<dynamic> categories = [];
+  dynamic selectedCategorie;
+
   @override
   void initState() {
     super.initState();
     if (clientController.clients.isEmpty) {
       clientController.fetchMesClients();
+    }
+    fetchCategories();
+  }
+
+  Future<void> fetchCategories() async {
+    print('fetchCategories appelée');
+    try {
+      final response = await Dio().get('http://localhost:4000/client/categorie-client');
+      print('Réponse catégories: ${response.data}');
+      setState(() {
+        categories = response.data is List ? response.data : response.data['data'];
+      });
+    } catch (e) {
+      print('Erreur lors du chargement des catégories: ${e}');
     }
   }
 
@@ -90,6 +109,27 @@ class _SelectClientPageState extends State<SelectClientPage> {
                 const SizedBox(height: 16),
                 _buildTextField(codeFiscaleController, "Code fiscal (13 chiffres)", colorScheme, inputType: TextInputType.number, maxLength: 13),
                 const SizedBox(height: 16),
+                // Champ de sélection de catégorie
+                DropdownButtonFormField(
+                  value: selectedCategorie,
+                  items: categories.map<DropdownMenuItem>((cat) {
+                    return DropdownMenuItem(
+                      value: cat['id'],
+                      child: Text(cat['nom']),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedCategorie = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    labelText: 'Catégorie de client *',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) => value == null ? 'La catégorie est requise' : null,
+                ),
+                const SizedBox(height: 16),
                 const Text(
                   'Sélectionnez la position sur la carte *',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -139,7 +179,8 @@ class _SelectClientPageState extends State<SelectClientPage> {
                     prenomController.text.isNotEmpty &&
                     codeFiscaleController.text.length == 13 &&
                     RegExp(r'^\d{13}$').hasMatch(codeFiscaleController.text) &&
-                    selectedLocation != null) {
+                    selectedLocation != null &&
+                    selectedCategorie != null) { // Ajoute la vérification
                   Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
 
                   final newClient = await clientController.addClient(
@@ -151,6 +192,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
                     codeFiscale: codeFiscaleController.text,
                     latitude: selectedLocation!.latitude,
                     longitude: selectedLocation!.longitude,
+                    categorieId: selectedCategorie, // Passe la catégorie ici
                   );
 
                   Get.back();
@@ -174,7 +216,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
                 } else {
                   Get.snackbar(
                     'Erreur',
-                    'Veuillez remplir tous les champs et saisir un code fiscal valide (13 chiffres)',
+                    'Veuillez remplir tous les champs, saisir un code fiscal valide (13 chiffres) et choisir une catégorie',
                     backgroundColor: Colors.red,
                     colorText: Colors.white,
                   );
@@ -206,6 +248,7 @@ class _SelectClientPageState extends State<SelectClientPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('build SelectClientPage');
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(

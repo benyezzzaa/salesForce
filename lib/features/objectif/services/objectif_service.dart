@@ -9,7 +9,9 @@ class ObjectifService {
 
   Future<List<ObjectifModel>> fetchObjectifs() async {
     final token = box.read('token');
-    print('TOKEN UTILISÉ POUR FETCH OBJECTIFS: $token');
+    print('🔍 ObjectifService: Début de fetchObjectifs');
+    print('🔍 ObjectifService: Token = ${token != null ? "Présent" : "Absent"}');
+    print('🔍 ObjectifService: URL = /objectifs/me/progress');
 
     try {
       final response = await _dio.get(
@@ -17,17 +19,20 @@ class ObjectifService {
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
-      print('RÉPONSE OBJECTIFS: ${response.data}');
+      print('🔍 ObjectifService: Status = ${response.statusCode}');
+      print('🔍 ObjectifService: Data = ${response.data}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        return data.map((json) => ObjectifModel.fromJson(json)).toList();
+        final objectifs = data.map((json) => ObjectifModel.fromJson(json)).toList();
+        print('🔍 ObjectifService: ${objectifs.length} objectifs trouvés');
+        return objectifs;
       } else {
-        print("❌ Erreur de chargement des objectifs : ${response.statusCode}");
+        print("❌ ObjectifService: Erreur ${response.statusCode}");
         return [];
       }
     } catch (e) {
-      print("❌ Exception lors de la récupération des objectifs : $e");
+      print("❌ ObjectifService: Exception = $e");
       return [];
     }
   }

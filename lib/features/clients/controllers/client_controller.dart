@@ -104,6 +104,7 @@ class ClientController extends GetxController {
     required double latitude,
     required double longitude,
     required String codeFiscale,
+    required dynamic categorieId, // Ajouté
   }) async {
     // Formatage automatique du téléphone
     String formattedTelephone = _formatTelephone(telephone);
@@ -131,6 +132,7 @@ class ClientController extends GetxController {
         'telephone': formattedTelephone, // ✅ Utilise 'telephone' comme dans la réponse backend
         'latitude': latitude,
         'longitude': longitude,
+        'categorieId': categorieId, // Ajouté
       };
 
       print('📤 Données envoyées au backend: $cleanData');
@@ -173,6 +175,7 @@ class ClientController extends GetxController {
             'telephone': formattedTelephone, // ✅ Utilise 'telephone' comme dans la réponse backend
             'latitude': latitude,
             'longitude': longitude,
+            'categorieId': categorieId, // Ajouté
           };
           
           print('📤 Données alternatives: $alternativeData');
@@ -197,6 +200,7 @@ class ClientController extends GetxController {
               'adresse': adresse.trim(),
               'codeFiscale': codeFiscale.trim(),
               'telephone': formattedTelephone, // ✅ Utilise 'telephone' comme dans la réponse backend
+              'categorieId': categorieId, // Ajouté
             };
             
             print('📤 Données minimales: $minimalData');

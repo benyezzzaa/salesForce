@@ -73,6 +73,16 @@ class ApiService {
     );
   }
 
+  /// PUT
+  Future<Response> put(String endpoint, Map<String, dynamic> data) async {
+    final token = _storage.read('token');
+    return await _dio.put(
+      endpoint,
+      data: data,
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+  }
+
   /// DOWNLOAD PDF
   Future<void> downloadPdf(int commandeId) async {
     try {

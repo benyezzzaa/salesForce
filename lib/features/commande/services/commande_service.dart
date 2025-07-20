@@ -7,23 +7,20 @@ class CommandeService {
   final Dio _dio = Dio(BaseOptions(baseUrl: AppApi.baseUrl));
   final box = GetStorage();
 
-  Future<void> envoyerCommande({
-    required String numeroCommande,
-    required int clientId,
-    required List<Map<String, dynamic>> lignesCommande,
-  }) async {
+  Future<void> envoyerCommande(Map<String, dynamic> payload) async {
     final token = box.read('token');
 
     try {
+      print('📡 CommandeService: Envoi du payload = $payload');
+      
       final response = await _dio.post(
         '/commandes',
-        data: {
-          'numeroCommande': numeroCommande,
-          'clientId': clientId,
-          'lignesCommande': lignesCommande,
-        },
+        data: payload,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
+
+      print('📡 CommandeService: Réponse status = ${response.statusCode}');
+      print('📡 CommandeService: Réponse data = ${response.data}');
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         print("✅ Commande envoyée avec succès");
@@ -33,6 +30,17 @@ class CommandeService {
       }
     } catch (e) {
       print("❌ Exception pendant l'envoi de la commande : $e");
+      
+      // Capturer les détails de l'erreur Dio
+      if (e is DioException) {
+        print("📡 DioException Type: ${e.type}");
+        print("📡 DioException Message: ${e.message}");
+        print("📡 DioException Response Status: ${e.response?.statusCode}");
+        print("📡 DioException Response Data: ${e.response?.data}");
+        print("📡 DioException Request Data: ${e.requestOptions.data}");
+        print("📡 DioException Request Headers: ${e.requestOptions.headers}");
+      }
+      
       throw Exception("Erreur lors de l'envoi");
     }
   }
@@ -42,7 +50,7 @@ class CommandeService {
 
   try {
     final response = await _dio.get(
-      '/commandes/me', // <-- Modifier ici
+      '/commandes/me',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 

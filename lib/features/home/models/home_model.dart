@@ -17,8 +17,8 @@ class HomeModel {
     double totalRealise = 0;
 
     for (var obj in objectifs) {
-      totalObjectif += obj.objectif ?? 0;
-      totalRealise += obj.realise;
+      totalObjectif += obj.objectif;
+      totalRealise += obj.realise ?? 0.0;
     }
 
     return totalObjectif > 0 ? (totalRealise / totalObjectif).clamp(0.0, 1.0) : 0.0;

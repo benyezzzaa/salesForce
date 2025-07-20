@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pfe/features/objectif/controller/objectifs_controller.dart';
-
+import '../models/objectif_model.dart';
 
 class ObjectifsPage extends StatelessWidget {
   const ObjectifsPage({super.key});
@@ -32,7 +32,8 @@ class ObjectifsPage extends StatelessWidget {
           separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final obj = controller.objectifs[index];
-            final isAtteint = obj["atteint"] == true;
+            final isAtteint = obj.atteint;
+            final realiseValue = obj.realise ?? 0.0;
             return Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -43,10 +44,10 @@ class ObjectifsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Catégorie : ${obj["categorie"]}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text("Catégorie : ${obj.categorie}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
-                  Text("Objectif : ${obj["objectif"]}%", style: const TextStyle(fontSize: 14)),
-                  Text("Réalisé : ${obj["realise"]}%", style: const TextStyle(fontSize: 14)),
+                  Text("Objectif : ${obj.objectif}%", style: const TextStyle(fontSize: 14)),
+                  Text("Réalisé : ${realiseValue.toStringAsFixed(1)}%", style: const TextStyle(fontSize: 14)),
                   const SizedBox(height: 6),
                   Row(
                     children: [
