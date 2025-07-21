@@ -30,6 +30,10 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
     notifController = Get.put(NotificationController());
     reclamationController = Get.put(ReclamationController());
     controller.fetchData(); // Recharge les objectifs à chaque fois
+    
+    // Debug logs
+    print('🏠 CommercialHomePage initState');
+    print('📊 Controller objectifs count: ${controller.objectifs.length}');
   }
 
   @override
@@ -173,9 +177,33 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
             ),
           ),
           const SizedBox(height: 8),
-          Obx(() => Column(
-            children: _buildObjectifsCards(controller.objectifs, colorScheme),
-          )),
+          Obx(() {
+            final now = DateTime.now();
+            final objectifsPerso = controller.objectifs.where((obj) => !obj.isGlobal && obj.dateFin.isAfter(now)).toList();
+            if (controller.isLoading.value) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (objectifsPerso.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Center(child: Text("Aucun objectif personnel")),
+              );
+            }
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: buildHorizontalBarChart(
+                objectifsPerso.map((obj) => {
+                  'label': obj.mission,
+                  'value': obj.ventes.toInt(),
+                  'prime': obj.prime.toInt(),
+                }).toList(),
+                color: Colors.grey,
+              ),
+            );
+          }),
           const SizedBox(height: 10),
 
           // Navigation rapide
@@ -231,197 +259,262 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
     );
   }
 
-  List<Widget> _buildObjectifsCards(List<ObjectifModel> objectifs, ColorScheme colorScheme) {
-    // Afficher un indicateur de chargement si les données sont en cours de chargement
-    if (objectifs.isEmpty) {
-      return [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          child: Center(
-            child: Column(
+  Widget _buildObjectifCard(ObjectifModel obj, ColorScheme colorScheme) {
+    final double percent = (obj.montantCible > 0) ? (obj.ventes / obj.montantCible).clamp(0.0, 1.0) : 0.0;
+    final String percentText = (percent * 100).toStringAsFixed(0);
+    final bool isFull = obj.atteint || percent >= 1.0;
+    
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // En-tête avec mission et pourcentage
+            Row(
               children: [
-                Icon(
-                  Icons.track_changes_outlined,
-                  size: 48,
-                  color: colorScheme.onSurface.withOpacity(0.5),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  "Aucun objectif disponible",
-                  style: TextStyle(
-                    color: colorScheme.onSurface.withOpacity(0.7),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    obj.mission,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  "Vos objectifs apparaîtront ici",
-                  style: TextStyle(
-                    color: colorScheme.onSurface.withOpacity(0.5),
-                    fontSize: 14,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isFull ? Colors.green : Colors.blue,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$percentText%',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-        ),
-      ];
-    }
-    return objectifs.map((obj) {
-      final double realise = obj.realise?.toDouble() ?? 0.0;
-      final double objectif = obj.objectif.toDouble();
-      final double percent = (objectif > 0) ? (realise / objectif).clamp(0.0, 1.0) : 0.0;
-      final String percentText = objectif > 0 ? ((realise / objectif) * 100).clamp(0.0, 100.0).toStringAsFixed(1) : '0.0';
-      final bool isFull = obj.atteint || (realise / objectif) >= 1.0;
-      
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 2,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isFull 
-                  ? [Colors.green.withOpacity(0.1), Colors.green.withOpacity(0.05)]
-                  : [colorScheme.primary.withOpacity(0.1), colorScheme.primary.withOpacity(0.05)],
+            const SizedBox(height: 12),
+            
+            // Barre de progression
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: percent,
+                minHeight: 8,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  isFull ? Colors.green : Colors.blue,
+                ),
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            const SizedBox(height: 12),
+            
+            // Informations détaillées
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        isFull ? Icons.check_circle : Icons.track_changes,
-                        color: isFull ? Colors.green : colorScheme.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          obj.categorie,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: colorScheme.onSurface,
-                          ),
+                      Text(
+                        'Objectif',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isFull ? Colors.green : colorScheme.primary,
-                          borderRadius: BorderRadius.circular(12),
+                      Text(
+                        '${obj.montantCible.toStringAsFixed(0)} €',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                        child: Text(
-                          '$percentText%',
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Réalisé',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      Text(
+                        '${obj.ventes.toStringAsFixed(0)} €',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isFull ? Colors.green : Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (obj.prime > 0)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Prime',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
                             fontSize: 12,
+                            color: Colors.grey.shade600,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
-                      value: percent,
-                      minHeight: 10,
-                      backgroundColor: colorScheme.surfaceVariant,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        isFull ? Colors.green : colorScheme.primary,
-                      ),
+                        Text(
+                          '${obj.prime.toStringAsFixed(0)} €',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Réalisé',
-                            style: TextStyle(
-                              color: colorScheme.onSurface.withOpacity(0.6),
-                              fontSize: 12,
-                            ),
-                          ),
-                          Text(
-                            '$realise',
-                            style: TextStyle(
-                              color: colorScheme.onSurface,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Objectif',
-                            style: TextStyle(
-                              color: colorScheme.onSurface.withOpacity(0.6),
-                              fontSize: 12,
-                            ),
-                          ),
-                          Text(
-                            '$objectif',
-                            style: TextStyle(
-                              color: colorScheme.onSurface,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+              ],
+            ),
+            
+            // Statut
+            if (isFull) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
+                    size: 16,
                   ),
-                  if (isFull) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.green.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.celebration, color: Colors.green, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Objectif atteint !',
-                            style: TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Objectif atteint !',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
+                  ),
                 ],
               ),
-            ),
-          ),
+            ],
+          ],
         ),
-      );
-    }).toList();
+      ),
+    );
+  }
+
+  Widget buildHorizontalBarChart(List<Map<String, dynamic>> data, {Color color = Colors.grey}) {
+    final max = data.map((e) => e['value'] as num).fold<num>(0, (a, b) => a > b ? a : b);
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: data.map((item) {
+          final double percent = max > 0 ? (item['value'] as num) / max : 0;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Barre stylée
+                Expanded(
+                  flex: 6,
+                  child: Container(
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.12),
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        FractionallySizedBox(
+                          widthFactor: percent,
+                          child: Container(
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: Colors.blueGrey.shade700,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Valeur réalisée dans un badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey.shade700,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${item['value']}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                if (item['prime'] != null && item['prime'] > 0) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade600,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Prime : ${item['prime']} €',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
   }
 }
 
@@ -477,3 +570,4 @@ class _QuickNavCard extends StatelessWidget {
     );
   }
 }
+

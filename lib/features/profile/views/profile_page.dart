@@ -278,9 +278,21 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   void _logout() {
+    print('🚪 MANUAL LOGOUT - User clicked logout button');
+    print('🧹 Clearing session data...');
+    
     final storage = GetStorage();
     storage.remove('token');
     storage.remove('user_id');
+    storage.remove('user');
+    storage.remove('login_timestamp');
+    
+    // Forcer la synchronisation
+    storage.save();
+    
+    print('✅ Session cleared successfully');
+    print('🔄 Redirecting to login page...');
+    
     Get.offAllNamed(AppRoutes.loginPage);
   }
 }

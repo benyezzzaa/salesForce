@@ -44,8 +44,8 @@ class LoginController extends GetxController {
           // Supprimer tous les controllers pour forcer une reconstruction propre
           Get.deleteAll(force: true);
 
-          print('Token and user data saved. Navigating to home page.');
-          Get.offAll(() => BottomNavWrapper(initialIndex: 0));
+          print('Token and user data saved. Navigating to BottomNavWrapper.');
+          Get.offAll(() => const BottomNavWrapper(initialIndex: 0));
 
         } else {
           Get.snackbar('Login Error', 'Missing token or user data.');

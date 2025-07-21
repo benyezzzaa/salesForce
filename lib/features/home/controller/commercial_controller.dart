@@ -20,11 +20,20 @@ class CommercialController extends GetxController {
   Future<void> fetchData() async {
     try {
       isLoading.value = true;
-      print('🔄 Chargement des objectifs...');
+      print('🔄 CommercialController: Début du chargement des objectifs...');
       
-      // Fetch objectives from the new service
+      // Test des endpoints pour debug
+      await _objectifService.testEndpoints();
+      
+      // Fetch objectives from the backend
       final objectifs = await _objectifService.fetchObjectifs();
-      print('📊 Objectifs récupérés: ${objectifs.length}');
+      print('📊 CommercialController: ${objectifs.length} objectifs récupérés du backend');
+      
+      // Log details of each objectif
+      for (int i = 0; i < objectifs.length; i++) {
+        final obj = objectifs[i];
+        print('📋 Objectif $i: ${obj.mission} - Cible: ${obj.montantCible}€ - Réalisé: ${obj.ventes}€ - Atteint: ${obj.atteint}');
+      }
 
       // Replace with actual sales data fetch if available
       final sales = <Map<String, dynamic>>[]; 
@@ -37,9 +46,10 @@ class CommercialController extends GetxController {
       );
 
       homeData.value = homeModel;
-      print('✅ Données du tableau de bord mises à jour');
+      print('✅ CommercialController: homeData mis à jour avec ${objectifs.length} objectifs');
+      print('🔍 CommercialController: objectifs getter retourne ${this.objectifs.length} objectifs');
     } catch (e) {
-      print('❌ Erreur fetchData: $e');
+      print('❌ CommercialController: Erreur fetchData: $e');
       Get.snackbar('Erreur', 'Échec de chargement des données du tableau de bord');
     } finally {
       isLoading.value = false;

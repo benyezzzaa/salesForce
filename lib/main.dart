@@ -3,6 +3,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pfe/core/routes/app_routes.dart';
+import 'package:pfe/core/utils/storage_services.dart';
+import 'package:pfe/core/widgets/app_main.dart';
+import 'package:pfe/core/widgets/splash_decider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -88,7 +91,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.loginPage,
+      // initialRoute: AppRoutes.loginPage,
+      // getPages: AppPages.routes,
+      home: const SplashDecider(),
       getPages: AppPages.routes,
       theme: ThemeData(
         fontFamily: 'Roboto',

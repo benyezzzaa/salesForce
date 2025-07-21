@@ -11,21 +11,57 @@ class ObjectifService {
     final token = box.read('token');
     print('🔍 ObjectifService: Début de fetchObjectifs');
     print('🔍 ObjectifService: Token = ${token != null ? "Présent" : "Absent"}');
-    print('🔍 ObjectifService: URL = /objectifs/me/progress');
 
     try {
+      // Test des deux endpoints pour debug
+      print('🧪 Test endpoint /objectifs/me/progress...');
+      final response1 = await _dio.get(
+        '/objectifs/me/progress',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      print('🧪 /objectifs/me/progress: ${response1.data.length} objectifs');
+      
+      print('🧪 Test endpoint /objectifs/debug/my-objectifs...');
+      final response2 = await _dio.get(
+        '/objectifs/debug/my-objectifs',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      print('🧪 /objectifs/debug/my-objectifs: ${response2.data.length} objectifs');
+
+      // Utiliser l'endpoint normal
       final response = await _dio.get(
         '/objectifs/me/progress',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       print('🔍 ObjectifService: Status = ${response.statusCode}');
-      print('🔍 ObjectifService: Data = ${response.data}');
+      print('🔍 ObjectifService: Data complet = ${response.data}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        final objectifs = data.map((json) => ObjectifModel.fromJson(json)).toList();
-        print('🔍 ObjectifService: ${objectifs.length} objectifs trouvés');
+        print('🔍 ObjectifService: Nombre d\'éléments dans la réponse: ${data.length}');
+        
+        if (data.isNotEmpty) {
+          print('🔍 ObjectifService: Premier élément: ${data.first}');
+        }
+        
+        final objectifs = data.map((json) {
+          try {
+            return ObjectifModel.fromJson(json);
+          } catch (e) {
+            print('❌ ObjectifService: Erreur parsing objectif $json: $e');
+            rethrow;
+          }
+        }).toList();
+        
+        print('🔍 ObjectifService: ${objectifs.length} objectifs parsés avec succès');
+        
+        // Log de chaque objectif pour debug
+        for (int i = 0; i < objectifs.length; i++) {
+          final obj = objectifs[i];
+          print('📋 ObjectifService Objectif $i: ${obj.mission} - Cible: ${obj.montantCible}€ - Réalisé: ${obj.ventes}€ - Atteint: ${obj.atteint}');
+        }
+        
         return objectifs;
       } else {
         print("❌ ObjectifService: Erreur ${response.statusCode}");
@@ -34,6 +70,31 @@ class ObjectifService {
     } catch (e) {
       print("❌ ObjectifService: Exception = $e");
       return [];
+    }
+  }
+
+  // Méthode de test pour comparer les endpoints
+  Future<void> testEndpoints() async {
+    final token = box.read('token');
+    print('🧪 Test des endpoints...');
+    
+    try {
+      // Test endpoint /objectifs/me/progress
+      final response1 = await _dio.get(
+        '/objectifs/me/progress',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      print('🧪 /objectifs/me/progress: ${response1.data.length} objectifs');
+      
+      // Test endpoint /objectifs
+      final response2 = await _dio.get(
+        '/objectifs',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      print('🧪 /objectifs: ${response2.data.length} objectifs');
+      
+    } catch (e) {
+      print('❌ Erreur test endpoints: $e');
     }
   }
 } 

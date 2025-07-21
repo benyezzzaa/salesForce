@@ -35,6 +35,7 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
       case 2:
         return CataloguePage();
       case 3:
+        return ProfilePage();
       default:
         return ProfilePage();
     }
@@ -87,15 +88,15 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
     return GestureDetector(
       onTap: () => _onItemTapped(index),
       child: Container(
-  width: 80, 
-  height: 60, 
-  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-          decoration: BoxDecoration(
+        width: 80, 
+        height: 60, 
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+        decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF3F51B5) : Colors.transparent,
           borderRadius: const BorderRadius.only(
-    topLeft: Radius.circular(20),
-    topRight: Radius.circular(20),
-  ),
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
           boxShadow: isSelected 
             ? [
                 BoxShadow(
