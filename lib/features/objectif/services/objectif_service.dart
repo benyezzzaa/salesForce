@@ -35,7 +35,7 @@ class ObjectifService {
       );
 
       print('🔍 ObjectifService: Status = ${response.statusCode}');
-      print('🔍 ObjectifService: Data complet = ${response.data}');
+      print('🔍 ObjectifService: Data complet =  [33m${response.data} [0m');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
@@ -60,6 +60,7 @@ class ObjectifService {
         for (int i = 0; i < objectifs.length; i++) {
           final obj = objectifs[i];
           print('📋 ObjectifService Objectif $i: ${obj.mission} - Cible: ${obj.montantCible}€ - Réalisé: ${obj.ventes}€ - Atteint: ${obj.atteint}');
+          print('DEBUG Objectif: mission=${obj.mission}, dateDebut=${obj.dateDebut}, dateFin=${obj.dateFin}');
         }
         
         return objectifs;

@@ -124,6 +124,155 @@ final adresseController = TextEditingController();
                             Text('Catégorie :  {client.categorieNom!}', style: TextStyle(color: Colors.indigo)),
                         ],
                       ),
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            final labelStyle = TextStyle(fontWeight: FontWeight.w600, color: Colors.blueGrey[800]);
+                            final valueStyle = TextStyle(fontWeight: FontWeight.w400, color: Colors.blueGrey[900]);
+                            final initials = (client.prenom.isNotEmpty ? client.prenom[0] : '') + (client.nom.isNotEmpty ? client.nom[0] : '');
+                            return Dialog(
+                              backgroundColor: Colors.grey[100],
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                              child: Container(
+                                width: 380,
+                                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(24),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.08),
+                                      blurRadius: 16,
+                                      offset: Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 36,
+                                      backgroundColor: Colors.indigo[100],
+                                      child: Text(
+                                        initials.toUpperCase(),
+                                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.indigo),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 14),
+                                    Text(
+                                      '${client.prenom} ${client.nom}',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.indigo),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    if (client.categorieNom != null && client.categorieNom!.isNotEmpty)
+                                      Container(
+                                        margin: const EdgeInsets.only(bottom: 10),
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.indigo[50],
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.category, color: Colors.indigo[400], size: 18),
+                                            const SizedBox(width: 6),
+                                            Text(client.categorieNom!, style: TextStyle(color: Colors.indigo[700], fontWeight: FontWeight.w600)),
+                                          ],
+                                        ),
+                                      ),
+                                    Divider(height: 28, thickness: 1.2),
+                                    Card(
+                                      color: Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.email, color: Colors.blueGrey[600]),
+                                            const SizedBox(width: 10),
+                                            Expanded(child: Text(client.email, style: valueStyle)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Card(
+                                      color: Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.phone, color: Colors.blueGrey[600]),
+                                            const SizedBox(width: 10),
+                                            Expanded(child: Text(client.telephone, style: valueStyle)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Card(
+                                      color: Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(Icons.location_on, color: Colors.blueGrey[600]),
+                                            const SizedBox(width: 10),
+                                            Expanded(child: Text(client.adresse ?? "Adresse inconnue", style: valueStyle)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Card(
+                                      color: Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.badge, color: Colors.blueGrey[600]),
+                                            const SizedBox(width: 10),
+                                            Text('Code fiscal : ', style: labelStyle),
+                                            Expanded(child: Text(client.codeFiscale ?? '-', style: valueStyle)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 18),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.indigo,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(vertical: 14),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                          elevation: 2,
+                                        ),
+                                        icon: const Icon(Icons.close),
+                                        label: const Text('Fermer', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                        onPressed: () => Navigator.of(context).pop(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -150,15 +299,15 @@ final adresseController = TextEditingController();
                               tooltip: 'Voir sur la carte',
                             ),
                           // Switch pour activer/désactiver le client
-                          Switch(
-                            value: client.isActive,
-                            activeColor: colorScheme.primary,
-                            inactiveThumbColor: colorScheme.outline,
-                            inactiveTrackColor: colorScheme.surfaceVariant,
-                            onChanged: (value) {
-                              clientController.toggleClientStatus(client.id, value);
-                            },
-                          ),
+                          // Switch(
+                          //   value: client.isActive,
+                          //   activeColor: colorScheme.primary,
+                          //   inactiveThumbColor: colorScheme.outline,
+                          //   inactiveTrackColor: colorScheme.surfaceVariant,
+                          //   onChanged: (value) {
+                          //     clientController.toggleClientStatus(client.id, value);
+                          //   },
+                          // ),
                         ],
                       ),
                     ),

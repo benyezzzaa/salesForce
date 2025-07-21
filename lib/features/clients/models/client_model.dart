@@ -9,6 +9,7 @@ class ClientModel {
   final double? latitude;
   final double? longitude;
   final String? categorieNom;
+  final String? codeFiscale;
 
   ClientModel({
     required this.id,
@@ -21,6 +22,7 @@ class ClientModel {
     this.latitude,
     this.longitude,
     this.categorieNom,
+    this.codeFiscale,
   });
 
   factory ClientModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class ClientModel {
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       categorieNom: json['categorie']?['nom'] ?? json['categorieNom'] ?? '',
+      codeFiscale: json['codeFiscale'] ?? json['code_fiscale'] ?? '',
     );
   }
 
@@ -49,6 +52,7 @@ class ClientModel {
       'latitude': latitude,
       'longitude': longitude,
       'categorieNom': categorieNom,
+      'codeFiscale': codeFiscale,
     };
   }
 

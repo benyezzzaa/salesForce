@@ -457,12 +457,23 @@ class ObjectifsPage extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            obj.categorie ?? 'Catégorie inconnue',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Période : '
+                                '${obj.dateDebut.day.toString().padLeft(2, '0')}/'
+                                '${obj.dateDebut.month.toString().padLeft(2, '0')}/'
+                                '${obj.dateDebut.year} - '
+                                '${obj.dateFin.day.toString().padLeft(2, '0')}/'
+                                '${obj.dateFin.month.toString().padLeft(2, '0')}/'
+                                '${obj.dateFin.year}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         Container(

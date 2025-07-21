@@ -192,16 +192,8 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
                 child: Center(child: Text("Aucun objectif personnel")),
               );
             }
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: buildHorizontalBarChart(
-                objectifsPerso.map((obj) => {
-                  'label': obj.mission,
-                  'value': obj.ventes.toInt(),
-                  'prime': obj.prime.toInt(),
-                }).toList(),
-                color: Colors.grey,
-              ),
+            return Column(
+              children: objectifsPerso.map((obj) => _buildObjectifCard(obj, colorScheme)).toList(),
             );
           }),
           const SizedBox(height: 10),
@@ -260,6 +252,7 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
   }
 
   Widget _buildObjectifCard(ObjectifModel obj, ColorScheme colorScheme) {
+    print('DEBUG Objectif: mission= [33m${obj.mission} [0m, dateDebut=${obj.dateDebut}, dateFin=${obj.dateFin}');
     final double percent = (obj.montantCible > 0) ? (obj.ventes / obj.montantCible).clamp(0.0, 1.0) : 0.0;
     final String percentText = (percent * 100).toStringAsFixed(0);
     final bool isFull = obj.atteint || percent >= 1.0;
@@ -268,152 +261,177 @@ class _CommercialHomePageState extends State<CommercialHomePage> {
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // En-tête avec mission et pourcentage
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    obj.mission,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isFull ? Colors.green : Colors.blue,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '$percentText%',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            
-            // Barre de progression
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: percent,
-                minHeight: 8,
-                backgroundColor: Colors.grey.shade200,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  isFull ? Colors.green : Colors.blue,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            
-            // Informations détaillées
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Objectif',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                      Text(
-                        '${obj.montantCible.toStringAsFixed(0)} €',
+                // En-tête avec mission et pourcentage
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        obj.mission,
                         style: const TextStyle(
-                          fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Réalisé',
-                        style: TextStyle(
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isFull ? Colors.green : Colors.blue,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '$percentText%',
+                        style: const TextStyle(
+                          color: Colors.white,
                           fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                      Text(
-                        '${obj.ventes.toStringAsFixed(0)} €',
-                        style: TextStyle(
-                          fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: isFull ? Colors.green : Colors.blue,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                if (obj.prime > 0)
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Prime',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                        Text(
-                          '${obj.prime.toStringAsFixed(0)} €',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange,
-                          ),
-                        ),
-                      ],
+                const SizedBox(height: 12),
+                
+                // Barre de progression
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: percent,
+                    minHeight: 8,
+                    backgroundColor: Colors.grey.shade200,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isFull ? Colors.green : Colors.blue,
                     ),
                   ),
+                ),
+                const SizedBox(height: 12),
+                
+                // Informations détaillées
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Objectif',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(
+                            '${obj.montantCible.toStringAsFixed(0)} €',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Réalisé',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(
+                            '${obj.ventes.toStringAsFixed(0)} €',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isFull ? Colors.green : Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (obj.prime > 0)
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Prime',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            Text(
+                              '${obj.prime.toStringAsFixed(0)} €',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
               ],
             ),
-            
-            // Statut
-            if (isFull) ...[
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.check_circle,
+          ),
+          // Statut
+          if (isFull) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Objectif atteint !',
+                  style: TextStyle(
                     color: Colors.green,
-                    size: 16,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Objectif atteint !',
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ],
-        ),
+          // Ajout du Padding de la période comme enfant du Column principal
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Center(
+              child: Text(
+                'Période : '
+                '${obj.dateDebut.day.toString().padLeft(2, '0')}/'
+                '${obj.dateDebut.month.toString().padLeft(2, '0')}/'
+                '${obj.dateDebut.year} - '
+                '${obj.dateFin.day.toString().padLeft(2, '0')}/'
+                '${obj.dateFin.month.toString().padLeft(2, '0')}/'
+                '${obj.dateFin.year}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
